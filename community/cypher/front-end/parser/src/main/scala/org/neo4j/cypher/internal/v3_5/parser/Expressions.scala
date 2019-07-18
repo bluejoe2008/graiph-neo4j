@@ -16,13 +16,25 @@
  */
 package org.neo4j.cypher.internal.v3_5.parser
 
-import org.neo4j.cypher.internal.v3_5.util.InputPosition
-import org.neo4j.cypher.internal.v3_5.{expressions => ast}
-import org.neo4j.cypher.internal.v3_5.expressions
 import org.neo4j.cypher.internal.v3_5.expressions._
+import org.neo4j.cypher.internal.v3_5.util.InputPosition
+import org.neo4j.cypher.internal.v3_5.expressions
+import org.neo4j.cypher.internal.v3_5.{expressions => ast}
 import org.parboiled.scala._
 
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
+
+object ExprExtensions {
+  def extendsExpr3(expr2:Rule1[org.neo4j.cypher.internal.v3_5.expressions.Expression], originalRuleTemplate: rules.ReductionRule1[Expression, Expression]) = {
+    (_expressions3.map(_.apply(expr2)).toArray
+      ++ Array(originalRuleTemplate)).reduce(_ | _)
+  }
+
+  val _expressions3 = ArrayBuffer[(Rule1[org.neo4j.cypher.internal.v3_5.expressions.Expression]) => rules.ReductionRule1[Expression, Expression]]();
+
+  def addExpr3(extendedExpr: (Rule1[org.neo4j.cypher.internal.v3_5.expressions.Expression]) => rules.ReductionRule1[Expression, Expression]) =
+    _expressions3 += extendedExpr;
+}
 
 trait Expressions extends Parser
   with Literals
@@ -129,14 +141,16 @@ trait Expressions extends Parser
 
   private def Expression3: Rule1[org.neo4j.cypher.internal.v3_5.expressions.Expression] = rule("an expression") {
     Expression2 ~ zeroOrMore(WS ~ (
-      group(operator("=~") ~~ Expression2) ~~>> (expressions.RegexMatch(_: org.neo4j.cypher.internal.v3_5.expressions.Expression, _))
-      | group(keyword("IN") ~~ Expression2) ~~>> (expressions.In(_: org.neo4j.cypher.internal.v3_5.expressions.Expression, _))
-      | group(keyword("STARTS WITH") ~~ Expression2) ~~>> (expressions.StartsWith(_: org.neo4j.cypher.internal.v3_5.expressions.Expression, _))
-      | group(keyword("ENDS WITH") ~~ Expression2) ~~>> (expressions.EndsWith(_: org.neo4j.cypher.internal.v3_5.expressions.Expression, _))
-      | group(keyword("CONTAINS") ~~ Expression2) ~~>> (expressions.Contains(_: org.neo4j.cypher.internal.v3_5.expressions.Expression, _))
-      | keyword("IS NULL") ~~>> (expressions.IsNull(_: org.neo4j.cypher.internal.v3_5.expressions.Expression))
-      | keyword("IS NOT NULL") ~~>> (expressions.IsNotNull(_: org.neo4j.cypher.internal.v3_5.expressions.Expression))
-    ): ReductionRule1[org.neo4j.cypher.internal.v3_5.expressions.Expression, org.neo4j.cypher.internal.v3_5.expressions.Expression])
+      ExprExtensions.extendsExpr3(Expression2,
+        group(operator("=~") ~~ Expression2) ~~>> (expressions.RegexMatch(_: org.neo4j.cypher.internal.v3_5.expressions.Expression, _))
+        | group(keyword("IN") ~~ Expression2) ~~>> (expressions.In(_: org.neo4j.cypher.internal.v3_5.expressions.Expression, _))
+        | group(keyword("STARTS WITH") ~~ Expression2) ~~>> (expressions.StartsWith(_: org.neo4j.cypher.internal.v3_5.expressions.Expression, _))
+        | group(keyword("ENDS WITH") ~~ Expression2) ~~>> (expressions.EndsWith(_: org.neo4j.cypher.internal.v3_5.expressions.Expression, _))
+        | group(keyword("CONTAINS") ~~ Expression2) ~~>> (expressions.Contains(_: org.neo4j.cypher.internal.v3_5.expressions.Expression, _))
+        | keyword("IS NULL") ~~>> (expressions.IsNull(_: org.neo4j.cypher.internal.v3_5.expressions.Expression))
+        | keyword("IS NOT NULL") ~~>> (expressions.IsNotNull(_: org.neo4j.cypher.internal.v3_5.expressions.Expression))
+        )
+      ): ReductionRule1[org.neo4j.cypher.internal.v3_5.expressions.Expression, org.neo4j.cypher.internal.v3_5.expressions.Expression])
   }
 
   private def Expression2: Rule1[org.neo4j.cypher.internal.v3_5.expressions.Expression] = rule("an expression") {
