@@ -150,3 +150,7 @@ Serveral functions are defined as Cypher UDFs:
 * Blob.is(blob: Blob, mimeType: String): Boolean, determine if the blob is kind of specified mime type
 
 These functions are registered automatically on start, so be free to use them.
+
+### Licensing
+
+Neo4j Community Edition is an open source product licensed under GPLv3.
