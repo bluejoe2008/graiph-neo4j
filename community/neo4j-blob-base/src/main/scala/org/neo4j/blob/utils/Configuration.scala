@@ -18,13 +18,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.neo4j.kernel.impl
+package org.neo4j.blob.utils
 
 import java.io.File
 
-import org.neo4j.blob.utils.Logging
-import org.neo4j.kernel.configuration.Config
-
+/**
+  * Created by bluejoe on 2019/7/23.
+  */
 trait Configuration {
   def getRaw(name: String): Option[String];
 }
@@ -91,24 +91,6 @@ class ConfigurationEx(conf: Configuration) extends Logging {
   }
 }
 
-object ConfigUtils {
-  implicit def neo4jConfig2Config(neo4jConf: Config) = new Configuration() {
-    override def getRaw(name: String): Option[String] = {
-      val raw = neo4jConf.getRaw(name);
-      if (raw.isPresent) {
-        Some(raw.get())
-      }
-      else {
-        None
-      }
-    }
-  }
-
-  implicit def neo4jConfig2Ex(neo4jConf: Config) = config2Ex(neo4jConfig2Config(neo4jConf));
-
-  implicit def config2Ex(conf: Configuration) = new ConfigurationEx(conf);
-}
-
 class ArgumentRequiredException(key: String) extends
   RuntimeException(s"argument required: $key") {
 
@@ -117,4 +99,8 @@ class ArgumentRequiredException(key: String) extends
 class WrongArgumentException(key: String, value: String, clazz: Class[_]) extends
   RuntimeException(s"wrong argument: $key, value=$value, expected: $clazz") {
 
+}
+
+object ConfigUtils {
+  implicit def config2Ex(conf: Configuration) = new ConfigurationEx(conf);
 }

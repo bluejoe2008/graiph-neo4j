@@ -51,7 +51,7 @@
     <dependencies>
         <dependency>
             <groupId>org.neo4j</groupId>
-            <artifactId>blob-api</artifactId>
+            <artifactId>neo4j-blob-base</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

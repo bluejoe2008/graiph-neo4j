@@ -26,10 +26,8 @@ import org.apache.commons.io.filefilter.TrueFileFilter
 import org.apache.commons.io.{FileUtils, IOUtils}
 import org.neo4j.blob._
 import org.neo4j.blob.utils.StreamUtils._
-import org.neo4j.blob.utils.{GlobalContext, Logging}
-import org.neo4j.kernel.impl.ConfigUtils._
-import org.neo4j.kernel.impl.Configuration
-
+import org.neo4j.blob.utils.{Configuration, GlobalContext, Logging}
+import org.neo4j.blob.utils.ConfigUtils._
 import scala.collection.JavaConversions._
 
 trait BlobStorage extends BatchBlobValueStorage {
@@ -148,11 +146,11 @@ object BlobStorage extends Logging {
     private def readFromBlobFile(blobFile: File): (BlobId, Blob) = {
       val fis = new FileInputStream(blobFile);
       val blobId = BlobId.readFromStream(fis);
-      val mimeType = MimeTypeFactory.fromCode(fis.readLong());
+      val mimeType = MimeType.fromCode(fis.readLong());
       val length = fis.readLong();
       fis.close();
 
-      val blob = BlobFactory.fromInputStreamSource(new InputStreamSource() {
+      val blob = Blob.fromInputStreamSource(new InputStreamSource() {
         def offerStream[T](consume: (InputStream) => T): T = {
           val is = new FileInputStream(blobFile);
           //NOTE: skip

@@ -40,6 +40,10 @@ import org.neo4j.cypher.internal.v3_5.util.InternalException
 import org.neo4j.cypher.internal.v3_5.util.NonEmptyList
 import org.neo4j.cypher.internal.v3_5.{expressions => ast}
 
+trait ExtendedCommandExpr {
+  def makeCommand(id: Id, self: ExpressionConverters): CommandExpression
+}
+
 case class CommunityExpressionConverter(tokenContext: TokenContext) extends ExpressionConverter {
 
   import PatternConverters._
@@ -54,6 +58,7 @@ case class CommunityExpressionConverter(tokenContext: TokenContext) extends Expr
                                    self: ExpressionConverters): Option[CommandExpression] = {
     val result = expression match {
       case e: ast.BlobLiteralExpr => new BlobLiteralCommand(e.value)
+      case e: ExtendedCommandExpr => e.makeCommand(id, self)
 
       case e: ast.Null => commandexpressions.Null()
       case e: ast.True => predicates.True()

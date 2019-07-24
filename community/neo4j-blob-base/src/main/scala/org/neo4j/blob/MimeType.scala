@@ -23,13 +23,18 @@ import java.util.Properties
 
 import eu.medsea.mimeutil.MimeUtil
 import org.apache.commons.io.IOUtils
-
 import scala.collection.JavaConversions._
 
 /**
   * Created by bluejoe on 2019/4/18.
   */
-object MimeTypeFactory {
+case class MimeType(code: Long, text: String) {
+  def major = text.split("/")(0);
+
+  def minor = text.split("/")(1);
+}
+
+object MimeType {
   MimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.MagicMimeMimeDetector");
 
   val properties = new Properties();

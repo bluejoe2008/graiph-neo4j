@@ -33,12 +33,12 @@ import org.neo4j.values.storable.{BlobArray, BlobValue}
 object StoreBlobIO extends Logging {
   def saveAndEncodeBlobAsByteArray(ic: ContextMap, blob: Blob): Array[Byte] = {
     val bid = ic.get[BlobStorage].save(blob);
-    BlobIO.pack(BlobFactory.makeEntry(bid, blob));
+    BlobIO.pack(Blob.makeEntry(bid, blob));
   }
 
   def saveBlob(ic: ContextMap, blob: Blob, keyId: Int, block: PropertyBlock) = {
     val bid = ic.get[BlobStorage].save(blob);
-    block.setValueBlocks(BlobIO._pack(BlobFactory.makeEntry(bid, blob), keyId));
+    block.setValueBlocks(BlobIO._pack(Blob.makeEntry(bid, blob), keyId));
   }
 
   def deleteBlobArrayProperty(ic: ContextMap, blobs: BlobArray): Unit = {
@@ -73,7 +73,7 @@ object StoreBlobIO extends Logging {
     val entry = BlobIO.unpack(values);
     val storage = ic.get[BlobStorage];
 
-    val blob = BlobFactory.makeStoredBlob(entry, new InputStreamSource {
+    val blob = Blob.makeStoredBlob(entry, new InputStreamSource {
       override def offerStream[T](consume: (InputStream) => T): T = {
         val bid = entry.id;
         storage.load(bid).getOrElse(throw new BlobNotExistException(bid)).offerStream(consume)

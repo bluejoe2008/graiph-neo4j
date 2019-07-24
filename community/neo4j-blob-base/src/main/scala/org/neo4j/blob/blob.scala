@@ -23,12 +23,81 @@ package org.neo4j.blob
 import java.io._
 import java.net.URL
 
+import org.apache.commons.codec.binary.Hex
 import org.apache.commons.io.IOUtils
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.HttpClientBuilder
+import org.neo4j.blob.utils.StreamUtils
+import org.neo4j.blob.utils.StreamUtils._
 
-object BlobFactory {
+trait InputStreamSource {
+  /**
+    * note close input stream after consuming
+    */
+  def offerStream[T](consume: (InputStream) => T): T;
+}
 
+trait BlobEntry {
+  val id: BlobId;
+  val length: Long;
+  val mimeType: MimeType;
+}
+
+trait Blob extends Comparable[Blob] {
+  val length: Long;
+  val mimeType: MimeType;
+  val streamSource: InputStreamSource;
+
+  def offerStream[T](consume: (InputStream) => T): T = streamSource.offerStream(consume);
+
+  def toBytes() = offerStream(IOUtils.toByteArray(_));
+
+  def makeTempFile(): File = {
+    offerStream((is) => {
+      val f = File.createTempFile("blob-", ".bin");
+      IOUtils.copy(is, new FileOutputStream(f));
+      f;
+    })
+  }
+
+  override def compareTo(o: Blob) = this.length.compareTo(o.length);
+
+  override def toString = s"blob(length=${length},mime-type=${mimeType.text})";
+}
+
+//actually a 4-long values
+case class BlobId(value1: Long, value2: Long) {
+  val values = Array[Long](value1, value2);
+
+  def asByteArray(): Array[Byte] = {
+    StreamUtils.convertLongArray2ByteArray(values);
+  }
+
+  def asLiteralString(): String = {
+    Hex.encodeHexString(asByteArray());
+  }
+}
+
+trait BlobWithId extends Blob {
+  def id: BlobId;
+
+  def entry: BlobEntry;
+}
+
+object BlobId {
+  val EMPTY = BlobId(-1L, -1L);
+
+  def fromBytes(bytes: Array[Byte]): BlobId = {
+    val is = new ByteArrayInputStream(bytes);
+    BlobId(is.readLong(), is.readLong());
+  }
+
+  def readFromStream(is: InputStream): BlobId = {
+    fromBytes(is.readBytes(16))
+  }
+}
+
+object Blob {
   private class BlobImpl(val streamSource: InputStreamSource, val length: Long, val mimeType: MimeType, val oid: Option[BlobId] = None)
     extends Blob with BlobWithId {
     def withId(nid: BlobId): BlobWithId = new BlobImpl(streamSource, length, mimeType, Some(nid));
@@ -65,7 +134,7 @@ object BlobFactory {
         fis.close();
         t;
       }
-    }, bytes.length, Some(MimeTypeFactory.fromText("application/octet-stream")));
+    }, bytes.length, Some(MimeType.fromText("application/octet-stream")));
   }
 
   val EMPTY: Blob = fromBytes(Array[Byte]());
@@ -73,7 +142,7 @@ object BlobFactory {
   def fromInputStreamSource(iss: InputStreamSource, length: Long, mimeType: Option[MimeType] = None): Blob = {
     new BlobImpl(iss,
       length,
-      mimeType.getOrElse(MimeTypeFactory.guessMimeType(iss)));
+      mimeType.getOrElse(MimeType.guessMimeType(iss)));
   }
 
   def fromFile(file: File, mimeType: Option[MimeType] = None): Blob = {
@@ -94,13 +163,13 @@ object BlobFactory {
     val get = new HttpGet(url);
     val resp = client.execute(get);
     val en = resp.getEntity;
-    val blob = BlobFactory.fromInputStreamSource(new InputStreamSource() {
+    val blob = Blob.fromInputStreamSource(new InputStreamSource() {
       override def offerStream[T](consume: (InputStream) => T): T = {
         val t = consume(en.getContent)
         client.close()
         t
       }
-    }, en.getContentLength, Some(MimeTypeFactory.fromText(en.getContentType.getValue)));
+    }, en.getContentLength, Some(MimeType.fromText(en.getContentType.getValue)));
 
     blob
   }

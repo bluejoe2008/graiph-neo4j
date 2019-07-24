@@ -24,11 +24,7 @@ import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
 
-import org.neo4j.driver.v1.Config;
-import org.neo4j.driver.v1.Driver;
-import org.neo4j.driver.v1.GraphDatabase;
-import org.neo4j.driver.v1.Session;
-import org.neo4j.driver.v1.StatementResult;
+import org.neo4j.driver.*;
 import org.neo4j.harness.junit.Neo4jRule;
 import org.neo4j.test.rule.SuppressOutput;
 import org.neo4j.tooling.procedure.procedures.valid.Procedures;
@@ -51,8 +47,8 @@ public class ProcedureTest
     @Test
     public void calls_simplistic_procedure()
     {
-        try ( Driver driver = GraphDatabase.driver( graphDb.boltURI(), configuration() );
-                Session session = driver.session() )
+        try (Driver driver = GraphDatabase.driver( graphDb.boltURI(), configuration() );
+             Session session = driver.session() )
         {
 
             StatementResult result = session.run( "CALL " + procedureNamespace + ".theAnswer()" );

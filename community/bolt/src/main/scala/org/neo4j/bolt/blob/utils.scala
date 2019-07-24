@@ -53,7 +53,7 @@ object BoltServerBlobIO {
     });
 
     //write blob entry
-    val entry = BlobFactory.makeEntry(tempBlobId, blob);
+    val entry = Blob.makeEntry(tempBlobId, blob);
     BlobIO._pack(entry).foreach(out.writeLong(_));
 
     //write inline

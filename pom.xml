@@ -754,6 +754,7 @@
       </plugin>
 
       <!-- Checkstyle is always validated -->
+      <!--
       <plugin>
         <artifactId>maven-checkstyle-plugin</artifactId>
         <version>3.0.0</version>
@@ -787,6 +788,7 @@
           </execution>
         </executions>
       </plugin>
+      -->
 
       <!-- Creates source jar if source exits -->
       <plugin>
@@ -828,12 +830,10 @@
         <file>
           <exists>src</exists>
         </file>
-        <property>
-          <name>!generateNotices</name>
-        </property>
       </activation>
       <build>
         <plugins>
+          <!--
           <plugin>
             <groupId>org.neo4j.build.plugins</groupId>
             <artifactId>licensing-maven-plugin</artifactId>
@@ -842,68 +842,7 @@
             <groupId>com.mycila</groupId>
             <artifactId>license-maven-plugin</artifactId>
           </plugin>
-        </plugins>
-      </build>
-    </profile>
-
-    <!--mvn install -DgenerateNotices-->
-    <profile>
-      <id>generateNotices</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-        <file>
-          <exists>src</exists>
-        </file>
-        <property>
-          <name>generateNotices</name>
-        </property>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.neo4j.build.plugins</groupId>
-            <artifactId>licensing-maven-plugin</artifactId>
-            <version>1.7.7</version>
-            <configuration>
-              <failIfDisliked>true</failIfDisliked>
-              <failIfMissing>true</failIfMissing>
-              <plainTextReport>true</plainTextReport>
-              <prependText>${licensing.prepend.text}</prependText>
-              <excludedGroups>
-                ^((org.neo4j){1}|(org.neo4j.app){1}|(org.neo4j.server.plugin){1}|(org.neo4j.assembly){1}|(org.neo4j.bolt){1}|(org.neo4j.build){1}|(org.neo4j.test){1})$
-              </excludedGroups>
-              <excludedArtifacts>^((neo4j-browser))$</excludedArtifacts>
-              <includedScopes>compile</includedScopes>
-            </configuration>
-            <executions>
-              <execution>
-                <id>list-all-licenses</id>
-                <phase>compile</phase>
-                <goals>
-                  <goal>check</goal>
-                </goals>
-                <configuration>
-                  <licensingRequirementFiles>
-                    <licensingRequirementFile>licensing/licensing-requirements-base.xml</licensingRequirementFile>
-                  </licensingRequirementFiles>
-                  <thirdPartyLicensingFilename>../NOTICE.txt</thirdPartyLicensingFilename>
-                  <listPrependText>licensing/list-prefix.txt</listPrependText>
-                  <listReport>../LICENSES.txt</listReport>
-                </configuration>
-              </execution>
-            </executions>
-            <dependencies>
-              <dependency>
-                <groupId>org.neo4j.build</groupId>
-                <artifactId>build-resources</artifactId>
-                <version>${project.version}</version>
-              </dependency>
-            </dependencies>
-          </plugin>
-          <plugin>
-            <groupId>com.mycila</groupId>
-            <artifactId>license-maven-plugin</artifactId>
-          </plugin>
+          -->
         </plugins>
       </build>
     </profile>
@@ -1100,8 +1039,9 @@
       <!-- testing -->
       <dependency>
         <groupId>org.neo4j.driver</groupId>
+        <!--https://github.com/bluejoe2008/neo4j-java-driver-with-blob-->
         <artifactId>neo4j-java-driver</artifactId>
-        <version>1.7.0</version>
+        <version>2.0.1-graiph</version>
         <scope>test</scope>
       </dependency>
       <dependency>

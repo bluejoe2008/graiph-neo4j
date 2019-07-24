@@ -20,7 +20,7 @@
 
 package org.neo4j.kernel.impl
 
-import org.neo4j.blob.utils.ContextMap
+import org.neo4j.blob.utils.{ConfigUtils, Configuration, ContextMap}
 import org.neo4j.blob.utils.ReflectUtils._
 import org.neo4j.kernel.configuration.Config
 import org.neo4j.kernel.impl.factory.GraphDatabaseFacade
@@ -70,4 +70,20 @@ object InstanceContext {
 
 class FaileToGetInstanceContextException(o: AnyRef) extends RuntimeException {
 
+}
+
+object Neo4jConfigUtils {
+  implicit def neo4jConfig2Config(neo4jConf: Config) = new Configuration() {
+    override def getRaw(name: String): Option[String] = {
+      val raw = neo4jConf.getRaw(name);
+      if (raw.isPresent) {
+        Some(raw.get())
+      }
+      else {
+        None
+      }
+    }
+  }
+
+  implicit def neo4jConfig2Ex(neo4jConf: Config) = ConfigUtils.config2Ex(neo4jConfig2Config(neo4jConf));
 }

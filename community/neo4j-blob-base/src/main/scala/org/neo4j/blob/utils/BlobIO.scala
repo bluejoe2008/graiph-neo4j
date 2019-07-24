@@ -46,8 +46,8 @@ object BlobIO {
 
     val bid = new BlobId(values(2), values(3));
 
-    val mt = MimeTypeFactory.fromCode(mimeType);
-    BlobFactory.makeEntry(bid, length, mt);
+    val mt = MimeType.fromCode(mimeType);
+    Blob.makeEntry(bid, length, mt);
   }
 
   def _pack(entry: BlobEntry, keyId: Int = 0): Array[Long] = {

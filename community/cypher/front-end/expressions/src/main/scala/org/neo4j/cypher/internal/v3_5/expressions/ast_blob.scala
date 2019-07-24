@@ -20,7 +20,7 @@ package org.neo4j.cypher.internal.v3_5.expressions
 import java.io.File
 
 import org.apache.commons.codec.binary.Base64
-import org.neo4j.blob.{BlobFactory, Blob}
+import org.neo4j.blob.Blob
 import org.neo4j.cypher.internal.v3_5.util.InputPosition
 import org.neo4j.cypher.internal.v3_5.{expressions => ast}
 
@@ -38,23 +38,23 @@ case class BlobLiteralExpr(value: BlobURL)(val position: InputPosition)
 case class BlobFileURL(filePath: String) extends BlobURL {
   override def asCanonicalString = filePath
 
-  def createBlob(): Blob = BlobFactory.fromFile(new File(filePath))
+  def createBlob(): Blob = Blob.fromFile(new File(filePath))
 }
 
 case class BlobBase64URL(base64: String) extends BlobURL {
   override def asCanonicalString = base64
 
-  def createBlob(): Blob = BlobFactory.fromBytes(Base64.decodeBase64(base64))
+  def createBlob(): Blob = Blob.fromBytes(Base64.decodeBase64(base64))
 }
 
 case class BlobHttpURL(url: String) extends BlobURL {
   override def asCanonicalString = url
 
-  def createBlob(): Blob = BlobFactory.fromHttpURL(url)
+  def createBlob(): Blob = Blob.fromHttpURL(url)
 }
 
 case class BlobFtpURL(url: String) extends BlobURL {
   override def asCanonicalString = url
 
-  def createBlob(): Blob = BlobFactory.fromURL(url)
+  def createBlob(): Blob = Blob.fromURL(url)
 }
