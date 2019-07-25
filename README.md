@@ -1,6 +1,6 @@
-## Neo4j-blob: BLOB(binary large object) extension for Neo4j 
+## graiph-neo4j: enhancing Neo4j with BLOB(binary large object) handling 
 
-Neo4j-blob module enhances Neo4j with a set of blob operation functions which makes it possible and convenient to store and use the BLOB in neo4j.
+graiph-neo4j enhances Neo4j with a set of blob operation functions which makes it possible and convenient to store and use the BLOB in neo4j.
 
 ### BLOB
 
