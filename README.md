@@ -147,4 +147,4 @@ These functions are registered automatically on start, so be free to use them.
 
 ### Licensing
 
-Neo4j Community Edition is an open source product licensed under GPLv3.
+Following Neo4j Community Edition, graiph-neo4j is an open source product licensed under GPLv3.
