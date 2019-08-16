@@ -30,7 +30,6 @@
 
   <modules>
     <module>standalone</module>
-    <module>full-neo4j</module>
   </modules>
 
   <licenses>

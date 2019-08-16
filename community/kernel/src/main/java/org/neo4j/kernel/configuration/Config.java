@@ -235,6 +235,7 @@ public class Config implements DiagnosticsProvider, Configuration
         public Builder withFile( final @Nullable File configFile )
         {
             this.configFile = configFile;
+            this.withSetting("config.file.path", configFile.getAbsolutePath());
             return this;
         }
 
@@ -253,7 +254,7 @@ public class Config implements DiagnosticsProvider, Configuration
         @Nonnull
         public Builder withFile( Optional<File> configFile )
         {
-            configFile.ifPresent( file -> this.configFile = file );
+            configFile.ifPresent( file -> this.withFile(file) );
             return this;
         }
 

@@ -158,7 +158,7 @@ public class GraphDatabaseBuilder
     {
         try
         {
-            return loadPropertiesFromURL( new File( fileName ).toURI().toURL() );
+            return loadPropertiesFromURL( new File( fileName ).toURI().toURL() ).setConfig("config.file.path", fileName);
         }
         catch ( MalformedURLException e )
         {

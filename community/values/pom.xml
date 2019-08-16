@@ -50,8 +50,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>cn.graiph</groupId>
-            <artifactId>blob-common</artifactId>
+            <groupId>org.neo4j</groupId>
+            <artifactId>graiph-blob</artifactId>
             <version>0.1</version>
         </dependency>
         <dependency>

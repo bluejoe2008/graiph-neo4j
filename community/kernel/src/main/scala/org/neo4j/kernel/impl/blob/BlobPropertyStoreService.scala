@@ -40,25 +40,28 @@ trait BlobPropertyStoreServicePlugin {
 }
 
 object BlobPropertyStoreServicePlugins extends Logging {
-  val extensions = ArrayBuffer[BlobPropertyStoreServicePlugin](new BlobStoragePlugin(), new DefaultBlobFunctionsPlugin());
+  val plugins = ArrayBuffer[BlobPropertyStoreServicePlugin](
+    new BlobStoragePlugin(),
+    new DefaultBlobFunctionsPlugin()
+  );
 
-  def add(plugin: BlobPropertyStoreServicePlugin) = extensions += plugin;
+  def add(plugin: BlobPropertyStoreServicePlugin) = plugins += plugin;
 
   def init(ctx: BlobPropertyStoreServiceContext): Unit = {
-    extensions.foreach { x =>
+    plugins.foreach { x =>
       x.init(ctx)
       logger.debug(s"plugin initialized: $x");
     }
   }
 
   def start(ctx: BlobPropertyStoreServiceContext): Unit = {
-    extensions.foreach {
+    plugins.foreach {
       _.start(ctx)
     }
   }
 
   def stop(ctx: BlobPropertyStoreServiceContext): Unit = {
-    extensions.foreach {
+    plugins.foreach {
       _.stop(ctx)
     }
   }
