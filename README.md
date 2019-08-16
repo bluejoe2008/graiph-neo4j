@@ -35,36 +35,30 @@ To consume content of a BLOB, use `offerStream`:
 
 It is unrecommended to use `Blob.toByteArray()` to avoid large memory cost.
 
-### build neo4j with blob
+### building
 
-Neo4j-blob is written in Scala, it requires Scala SDK 2.11 and JDK 8.0.
+graiph-neo4j/Neo4j is written in Scala, it requires Scala SDK 2.11 and JDK 8.0.
 
-Three maven modules exist in `neo4j-blob` dir: 
-* `neo4j-blob-api`: defines interfaces `Blob`, `BlobId`, ...
-* `neo4j-blob-util`: defines some tools like `BlobFactory`, this requires `neo4j-blob-api` as dependency
-* `neo4j-blob-test`: test cases, this requires `neo4j-blob-api`, `neo4j-kernel` as dependencies
+graiph-neo4j depends on an external library `graiph-blob-common`, which defines interfaces `Blob`, `BlobId`, ...
+For integration tests, an other external library `graiph-java-driver` is also required, which provides java driver for Neo4j server.
 
-1. install neo4j-blob-api
-```
-cd community/neo4j-blob/neo4j-blob-api
-mvn install
-```
-
-2. install neo4j-blob-util
-```
-cd community/neo4j-blob/neo4j-blob-util
-mvn install
-```
-
-3. build neo4j-java-driver, which is required by `neo4j-bolt` as dependecy:
+1. install graiph-blob-common
 ```
 cd <your workspace dir>
-git clone https://github.com/bluejoe2008/neo4j-java-driver-with-blob
-cd neo4j-java-driver-with-blob
+git clone https://github.com/grapheco/graiph-blob-common
+cd graiph-blob-common
+mvn install
+```
+
+2. build graiph-java-driver
+```
+cd <your workspace dir>
+git clone https://github.com/grapheco/graiph-java-driver
+cd graiph-java-driver
 mvn install -DskipTests
 ```
 
-4. return to `neo4j` project:
+3. return to `graiph-neo4j` project:
 ```
 mvn install
 ```
@@ -153,4 +147,4 @@ These functions are registered automatically on start, so be free to use them.
 
 ### Licensing
 
-Neo4j Community Edition is an open source product licensed under GPLv3.
+Following Neo4j Community Edition, graiph-neo4j is an open source product licensed under GPLv3.
