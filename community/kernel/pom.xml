@@ -93,9 +93,9 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>org.neo4j</groupId>
-            <artifactId>graiph-blob</artifactId>
-            <version>0.1</version>
+            <groupId>org.grapheco</groupId>
+            <artifactId>graiph-blob-commons</artifactId>
+            <version>0.1.0</version>
         </dependency>
         <!-- main dependencies, internal -->
         <dependency>
