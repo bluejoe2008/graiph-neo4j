@@ -31,7 +31,7 @@ import java.time.ZonedDateTime;
 import java.util.Collection;
 
 import org.neo4j.blob.Blob;
-import org.neo4j.blob.utils.ContextMap;
+import org.neo4j.blob.util.ContextMap;
 import org.neo4j.helpers.collection.Pair;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.kernel.configuration.Config;

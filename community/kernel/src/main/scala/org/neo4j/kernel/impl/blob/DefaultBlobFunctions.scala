@@ -22,7 +22,8 @@ package org.neo4j.kernel.impl.blob
 import java.io.{File, FileInputStream}
 
 import org.apache.commons.io.IOUtils
-import org.neo4j.blob.{MimeType, Blob}
+import org.neo4j.blob.impl.{BlobFactory, MimeTypeFactory}
+import org.neo4j.blob.{Blob, MimeType}
 import org.neo4j.procedure.{Description, Name, UserFunction}
 
 /**
@@ -41,49 +42,49 @@ class DefaultBlobFunctions {
       throw new CypherFunctionException(s"file not found: $filePath");
     }
 
-    Blob.fromFile(file);
+    BlobFactory.fromFile(file);
   }
 
   @UserFunction("Blob.fromURL")
   @Description("load blob from an url")
   def fromURL(@Name("url") url: String): Blob = {
-    Blob.fromURL(url);
+    BlobFactory.fromURL(url);
   }
 
   @UserFunction("Blob.fromUTF8String")
   @Description("generate a blob object from the given file")
   def fromUTF8String(@Name("text") text: String): Blob = {
-    Blob.fromBytes(text.getBytes("utf-8"));
+    BlobFactory.fromBytes(text.getBytes("utf-8"));
   }
 
   @UserFunction("Blob.fromString")
   @Description("generate a blob object from the given file")
   def fromString(@Name("text") text: String, @Name("encoding") encoding: String): Blob = {
-    Blob.fromBytes(text.getBytes(encoding));
+    BlobFactory.fromBytes(text.getBytes(encoding));
   }
 
   @UserFunction("Blob.fromBytes")
   @Description("generate a blob object from the given file")
   def fromBytes(@Name("bytes") bytes: Array[Byte]): Blob = {
-    Blob.fromBytes(bytes);
+    BlobFactory.fromBytes(bytes);
   }
 
   @UserFunction("Bytes.guessType")
   @Description("guess mime type of a byte array")
   def guessBytesMimeType(@Name("bytes") bytes: Array[Byte]): String = {
-    MimeType.guessMimeType(Blob.fromBytes(bytes).streamSource).toString;
+    MimeTypeFactory.guessMimeType(BlobFactory.fromBytes(bytes).streamSource).toString;
   }
 
   @UserFunction("Blob.guessType")
   @Description("guess mime type of a blob")
   def guessBlobMimeType(@Name("blob") blob: Blob): String = {
-    MimeType.guessMimeType(blob.streamSource).toString;
+    MimeTypeFactory.guessMimeType(blob.streamSource).toString;
   }
 
   @UserFunction("Blob.empty")
   @Description("generate an empty blob")
   def empty(): Blob = {
-    Blob.EMPTY
+    BlobFactory.EMPTY
   }
 
   @UserFunction("Blob.len")

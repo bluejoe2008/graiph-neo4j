@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.function.ToIntFunction;
 
 import org.neo4j.blob.Blob;
-import org.neo4j.blob.utils.ContextMap;
+import org.neo4j.blob.util.ContextMap;
 import org.neo4j.helpers.collection.Iterables;
 import org.neo4j.helpers.collection.Pair;
 import org.neo4j.io.pagecache.PageCache;

@@ -22,9 +22,10 @@ package org.neo4j.bolt.blob
 import java.util.concurrent.atomic.AtomicInteger
 
 import org.apache.commons.codec.digest.DigestUtils
-import org.neo4j.blob.utils.ReflectUtils._
-import org.neo4j.blob.utils._
+import org.neo4j.blob.util.ReflectUtils._
+import org.neo4j.blob.util._
 import org.neo4j.blob._
+import org.neo4j.blob.impl.BlobFactory
 import org.neo4j.kernel.api.KernelTransaction
 import org.neo4j.kernel.api.KernelTransaction.CloseListener
 import org.neo4j.kernel.impl.coreapi.{InternalTransaction, TopLevelTransaction}
@@ -53,7 +54,7 @@ object BoltServerBlobIO {
     });
 
     //write blob entry
-    val entry = Blob.makeEntry(tempBlobId, blob);
+    val entry = BlobFactory.makeEntry(tempBlobId, blob);
     BlobIO._pack(entry).foreach(out.writeLong(_));
 
     //write inline

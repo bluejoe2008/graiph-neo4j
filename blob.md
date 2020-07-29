@@ -14,11 +14,11 @@
 
 BLOBs represent binary streams stored in an EXTERNAL storage (local files system, distributed file system, etc) and can be consumed in streamming manner (only offer new bytes on calling `next()`). Unlike BLOBs, byte arrays are always stored INSIDE a Neo4j store, and often be fetched as a whole object (thus large byte arrays are not suitable to be stored in Neo4j).
 
-to use BLOB, `graiph-blob-commons` (https://github.com/grapheco/graiph-blob-commons) artifact is required:
+to use BLOB, `graiph-blob-impl` (https://github.com/grapheco/graiph-blob-commons) artifact is required:
 ```
 <dependency>
     <groupId>org.grapheco</groupId>
-    <artifactId>graiph-blob-commons</artifactId>
+    <artifactId>graiph-blob-api</artifactId>
     <version>0.1.0</version>
 </dependency>
 ```

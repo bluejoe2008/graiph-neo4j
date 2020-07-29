@@ -35,7 +35,7 @@ import javax.annotation.Nonnull;
 
 import org.neo4j.blob.Blob;
 import org.neo4j.blob.BlobWithId;
-import org.neo4j.blob.utils.BlobIO;
+import org.neo4j.blob.util.BlobIO;
 import org.neo4j.graphdb.Resource;
 import org.neo4j.io.ByteUnit;
 import org.neo4j.kernel.impl.util.collection.Memory;
