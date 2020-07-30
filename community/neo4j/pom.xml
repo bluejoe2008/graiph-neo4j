@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.neo4j</groupId>
     <artifactId>parent</artifactId>
-    <version>3.5.6-BLOB</version>
+    <version>3.5.6-BLOB-SNAPSHOT</version>
     <relativePath>../..</relativePath>
   </parent>
 
   <artifactId>neo4j</artifactId>
-  <version>3.5.6-BLOB</version>
+  <version>3.5.6-BLOB-SNAPSHOT</version>
 
   <name>Neo4j - Community</name>
   <packaging>jar</packaging>
@@ -67,52 +67,52 @@ the relevant Commercial Agreement.
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-kernel</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-lucene-index</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-fulltext-index</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-graph-algo</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-udc</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-data-collector</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-cypher</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-jmx</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-bolt</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-consistency-check</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
         </dependency>
 
         <!-- For the tests specified by this package -->
@@ -148,41 +148,41 @@ the relevant Commercial Agreement.
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-common</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-random-values</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-kernel</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-io</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-logging</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-consistency-check</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>

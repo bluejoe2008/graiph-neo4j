@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.neo4j</groupId>
     <artifactId>parent</artifactId>
-    <version>3.5.6-BLOB</version>
+    <version>3.5.6-BLOB-SNAPSHOT</version>
     <relativePath>../..</relativePath>
   </parent>
 
@@ -16,7 +16,7 @@
 
   <modelVersion>4.0.0</modelVersion>
   <artifactId>neo4j-values</artifactId>
-  <version>3.5.6-BLOB</version>
+  <version>3.5.6-BLOB-SNAPSHOT</version>
 
   <packaging>jar</packaging>
   <name>Neo4j - Value</name>
@@ -52,12 +52,11 @@
         <dependency>
             <groupId>org.grapheco</groupId>
             <artifactId>graiph-blob-api</artifactId>
-            <version>0.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-graphdb-api</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

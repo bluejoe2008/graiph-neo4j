@@ -5,7 +5,7 @@
 
   <groupId>org.neo4j</groupId>
   <artifactId>parent</artifactId>
-  <version>3.5.6-BLOB</version>
+  <version>3.5.6-BLOB-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Neo4j</name>
   <description>Neo4j Graph Database</description>
@@ -53,10 +53,13 @@
   </issueManagement>
 
   <distributionManagement>
+    <snapshotRepository>
+      <id>sdc</id>
+      <url>http://10.0.82.220:8081/repository/maven-snapshots/</url>
+    </snapshotRepository>
     <repository>
-      <id>sonatype-nexus-staging</id>
-      <name>Nexus Release Repository</name>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+      <id>sdc</id>
+      <url>http://10.0.82.220:8081/repository/maven-releases</url>
     </repository>
   </distributionManagement>
 
@@ -505,7 +508,7 @@
             <dependency>
               <groupId>org.neo4j.build</groupId>
               <artifactId>build-resources</artifactId>
-              <version>${project.version}</version>
+              <version>3.5.6-BLOB-SNAPSHOT</version>
             </dependency>
           </dependencies>
         </plugin>
@@ -551,7 +554,7 @@
             <dependency>
               <groupId>org.neo4j.build</groupId>
               <artifactId>build-resources</artifactId>
-              <version>${project.version}</version>
+              <version>3.5.6-BLOB-SNAPSHOT</version>
             </dependency>
           </dependencies>
         </plugin>
@@ -775,7 +778,7 @@
           <dependency>
             <groupId>org.neo4j.build</groupId>
             <artifactId>build-resources</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
           </dependency>
         </dependencies>
         <executions>
@@ -986,6 +989,23 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
+        <groupId>org.grapheco</groupId>
+        <artifactId>graiph-blob-api</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.grapheco</groupId>
+        <artifactId>graiph-blob-impl</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.neo4j.driver</groupId>
+        <!--https://github.com/bluejoe2008/neo4j-java-driver-with-blob-->
+        <artifactId>neo4j-java-driver</artifactId>
+        <version>2.0.1-graiph-SNAPSHOT</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
         <groupId>org.apache.lucene</groupId>
         <artifactId>lucene-analyzers-common</artifactId>
         <version>${lucene.version}</version>
@@ -1034,15 +1054,6 @@
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
         <version>1.7.25</version>
-      </dependency>
-
-      <!-- testing -->
-      <dependency>
-        <groupId>org.neo4j.driver</groupId>
-        <!--https://github.com/bluejoe2008/neo4j-java-driver-with-blob-->
-        <artifactId>neo4j-java-driver</artifactId>
-        <version>2.0.1-graiph</version>
-        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.apache.directory.server</groupId>
@@ -1466,7 +1477,6 @@
         <artifactId>activation</artifactId>
         <version>1.1.1</version>
       </dependency>
-
     </dependencies>
   </dependencyManagement>
 </project>

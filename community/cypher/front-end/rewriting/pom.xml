@@ -3,14 +3,14 @@
   <parent>
     <groupId>org.neo4j</groupId>
     <artifactId>neo4j-front-end-parent-3.5</artifactId>
-    <version>3.5.6-BLOB</version>
+    <version>3.5.6-BLOB-SNAPSHOT</version>
     <relativePath>../</relativePath>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
   <artifactId>neo4j-rewriting-3.5</artifactId>
   <packaging>jar</packaging>
-  <version>3.5.6-BLOB</version>
+  <version>3.5.6-BLOB-SNAPSHOT</version>
   <name>openCypher Rewriting</name>
 
   <description>Tree rewriting support, and AST rewriters for the Cypher query language</description>
@@ -52,13 +52,13 @@
     <dependency>
       <groupId>org.neo4j</groupId>
       <artifactId>neo4j-util-3.5</artifactId>
-      <version>${project.version}</version>
+      <version>3.5.6-BLOB-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.neo4j</groupId>
       <artifactId>neo4j-util-3.5</artifactId>
-      <version>${project.version}</version>
+      <version>3.5.6-BLOB-SNAPSHOT</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
@@ -66,13 +66,13 @@
     <dependency>
       <groupId>org.neo4j</groupId>
       <artifactId>neo4j-ast-3.5</artifactId>
-      <version>${project.version}</version>
+      <version>3.5.6-BLOB-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.neo4j</groupId>
       <artifactId>neo4j-ast-3.5</artifactId>
-      <version>${project.version}</version>
+      <version>3.5.6-BLOB-SNAPSHOT</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
@@ -80,13 +80,13 @@
     <dependency>
       <groupId>org.neo4j</groupId>
       <artifactId>neo4j-expressions-3.5</artifactId>
-      <version>${project.version}</version>
+      <version>3.5.6-BLOB-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.neo4j</groupId>
       <artifactId>neo4j-parser-3.5</artifactId>
-      <version>${project.version}</version>
+      <version>3.5.6-BLOB-SNAPSHOT</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
@@ -94,7 +94,7 @@
     <dependency>
       <groupId>org.neo4j</groupId>
       <artifactId>neo4j-parser-3.5</artifactId>
-      <version>${project.version}</version>
+      <version>3.5.6-BLOB-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
 

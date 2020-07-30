@@ -3,14 +3,14 @@
   <parent>
     <groupId>org.neo4j</groupId>
     <artifactId>neo4j-front-end-parent-3.5</artifactId>
-    <version>3.5.6-BLOB</version>
+    <version>3.5.6-BLOB-SNAPSHOT</version>
     <relativePath>../</relativePath>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
   <artifactId>neo4j-expressions-3.5</artifactId>
   <packaging>jar</packaging>
-  <version>3.5.6-BLOB</version>
+  <version>3.5.6-BLOB-SNAPSHOT</version>
   <name>openCypher Expressions</name>
 
   <description>Cypher expressions</description>
@@ -57,18 +57,16 @@
     <dependency>
       <groupId>org.grapheco</groupId>
       <artifactId>graiph-blob-impl</artifactId>
-      <version>0.1.0</version>
     </dependency>
     <dependency>
       <groupId>org.neo4j</groupId>
       <artifactId>neo4j-util-3.5</artifactId>
-      <version>${project.version}</version>
+      <version>3.5.6-BLOB-SNAPSHOT</version>
     </dependency>
-
     <dependency>
       <groupId>org.neo4j</groupId>
       <artifactId>neo4j-util-3.5</artifactId>
-      <version>${project.version}</version>
+      <version>3.5.6-BLOB-SNAPSHOT</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>

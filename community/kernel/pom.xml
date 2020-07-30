@@ -4,13 +4,13 @@
     <parent>
         <groupId>org.neo4j</groupId>
         <artifactId>parent</artifactId>
-        <version>3.5.6-BLOB</version>
+        <version>3.5.6-BLOB-SNAPSHOT</version>
         <relativePath>../..</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>neo4j-kernel</artifactId>
-    <version>3.5.6-BLOB</version>
+    <version>3.5.6-BLOB-SNAPSHOT</version>
 
     <name>Neo4j - Graph Database Kernel</name>
     <description>
@@ -95,63 +95,62 @@
         <dependency>
             <groupId>org.grapheco</groupId>
             <artifactId>graiph-blob-impl</artifactId>
-            <version>0.1.0</version>
         </dependency>
         <!-- main dependencies, internal -->
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-annotation-processors</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-graphdb-api</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-procedure-api</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-kernel-api</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-common</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-values</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-collections</artifactId>
-            <version>3.5.6-BLOB</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-io</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-csv</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-logging</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-lucene-upgrade</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>*</groupId>
@@ -167,22 +166,22 @@
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-configuration</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-index</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-spatial-index</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-ssl</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
@@ -230,14 +229,14 @@
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-common</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-random-values</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -248,21 +247,21 @@
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-io</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-kernel-api</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-logging</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
@@ -277,14 +276,14 @@
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-values</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-index</artifactId>
-            <version>${project.version}</version>
+            <version>3.5.6-BLOB-SNAPSHOT</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>

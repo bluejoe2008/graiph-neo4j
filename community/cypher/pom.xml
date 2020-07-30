@@ -6,12 +6,12 @@
   <parent>
     <groupId>org.neo4j</groupId>
     <artifactId>parent</artifactId>
-    <version>3.5.6-BLOB</version>
+    <version>3.5.6-BLOB-SNAPSHOT</version>
     <relativePath>../..</relativePath>
   </parent>
 
   <artifactId>cypher-parent</artifactId>
-  <version>3.5.6-BLOB</version>
+  <version>3.5.6-BLOB-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Neo4j - Community Cypher Build</name>
   <description>Project that builds the Neo4j Cypher modules as part of the Community distribution.</description>
@@ -123,33 +123,33 @@
       <dependency>
         <groupId>org.neo4j</groupId>
         <artifactId>neo4j-kernel</artifactId>
-        <version>${project.version}</version>
+        <version>3.5.6-BLOB-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.neo4j</groupId>
         <artifactId>neo4j-kernel</artifactId>
-        <version>${project.version}</version>
+        <version>3.5.6-BLOB-SNAPSHOT</version>
         <type>test-jar</type>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.neo4j</groupId>
         <artifactId>neo4j-common</artifactId>
-        <version>${project.version}</version>
+        <version>3.5.6-BLOB-SNAPSHOT</version>
         <type>test-jar</type>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.neo4j</groupId>
         <artifactId>neo4j-io</artifactId>
-        <version>${project.version}</version>
+        <version>3.5.6-BLOB-SNAPSHOT</version>
         <type>test-jar</type>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.neo4j</groupId>
         <artifactId>neo4j-lucene-index</artifactId>
-        <version>${project.version}</version>
+        <version>3.5.6-BLOB-SNAPSHOT</version>
       </dependency>
       <!-- graph matching is used in old cypher compilers 3.1 and 2.3 we can use the old component -->
       <dependency>
@@ -160,7 +160,7 @@
       <dependency>
         <groupId>org.neo4j</groupId>
         <artifactId>neo4j-graph-algo</artifactId>
-        <version>${project.version}</version>
+        <version>3.5.6-BLOB-SNAPSHOT</version>
       </dependency>
 
       <!-- other -->

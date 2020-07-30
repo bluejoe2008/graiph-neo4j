@@ -5,7 +5,7 @@
 
     <groupId>org.neo4j.build</groupId>
     <artifactId>build-resources</artifactId>
-    <version>3.5.6-BLOB</version>
+    <version>3.5.6-BLOB-SNAPSHOT</version>
 
     <name>Neo4j - Build resources</name>
     <description>Build resources for community build.</description>
@@ -20,6 +20,17 @@
         <developerConnection>scm:git:git@github.com:neo4j/neo4j.git</developerConnection>
         <url>https://github.com/neo4j/neo4j</url>
     </scm>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>sdc</id>
+            <url>http://10.0.82.220:8081/repository/maven-snapshots/</url>
+        </snapshotRepository>
+        <repository>
+            <id>sdc</id>
+            <url>http://10.0.82.220:8081/repository/maven-releases</url>
+        </repository>
+    </distributionManagement>
 
     <developers>
         <developer>
