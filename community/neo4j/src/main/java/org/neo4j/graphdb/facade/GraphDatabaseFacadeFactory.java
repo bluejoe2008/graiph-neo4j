@@ -29,6 +29,7 @@ import org.neo4j.graphdb.DependencyResolver;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.facade.extension.ExtendedDatabaseLifecyclePluginsService;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.internal.DataCollectorManager;
 import org.neo4j.graphdb.factory.module.DataSourceModule;
@@ -48,7 +49,6 @@ import org.neo4j.kernel.builtinprocs.SpecialBuiltInProcedures;
 import org.neo4j.kernel.configuration.Config;
 import org.neo4j.kernel.extension.KernelExtensionFactory;
 import org.neo4j.kernel.impl.api.dbms.NonTransactionalDbmsOperations;
-import org.neo4j.kernel.impl.blob.BlobPropertyStoreService;
 import org.neo4j.kernel.impl.cache.VmPauseMonitorComponent;
 import org.neo4j.kernel.impl.factory.DatabaseInfo;
 import org.neo4j.kernel.impl.factory.GraphDatabaseFacade;
@@ -187,7 +187,7 @@ public class GraphDatabaseFacadeFactory
         platform.dependencies.satisfyDependency( new NonTransactionalDbmsOperations( procedures ) );
 
         //blob support
-        platform.life.add( new BlobPropertyStoreService( procedures, storeDir, config, databaseInfo ) );
+        platform.life.add( new ExtendedDatabaseLifecyclePluginsService( procedures, storeDir, config, databaseInfo ) );
 
         Logger msgLog = platform.logging.getInternalLog( getClass() ).infoLogger();
         DatabaseManager databaseManager = edition.createDatabaseManager( graphDatabaseFacade, platform, edition, procedures, msgLog );
