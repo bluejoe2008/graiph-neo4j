@@ -25,15 +25,13 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.time.Clock;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import org.neo4j.graphdb.DependencyResolver;
 import org.neo4j.graphdb.facade.GraphDatabaseFacadeFactory.Dependencies;
+import org.neo4j.graphdb.factory.StartingMessageFactory;
 import org.neo4j.helpers.AdvertisedSocketAddress;
 import org.neo4j.helpers.ListenSocketAddress;
 import org.neo4j.helpers.RunCarefully;
@@ -113,7 +111,8 @@ public abstract class AbstractNeoServer implements NeoServer
             Pattern.compile( "/browser.*" ),
             Pattern.compile( "/" )
     };
-    public static String NEO4J_IS_STARTING_MESSAGE = "======== Neo4j " + Version.getNeo4jVersion() + " ========";
+
+    public static final String NEO4J_IS_STARTING_MESSAGE = ServiceLoader.load(StartingMessageFactory.class).iterator().next().getMessage();
 
     protected final LogProvider userLogProvider;
     private final Log log;
