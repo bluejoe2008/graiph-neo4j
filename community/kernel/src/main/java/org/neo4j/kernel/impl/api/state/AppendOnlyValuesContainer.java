@@ -34,7 +34,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 
 import org.neo4j.blob.Blob;
-import org.neo4j.blob.BlobWithId;
+import org.neo4j.blob.ManagedBlob;
 import org.neo4j.blob.util.BlobIO;
 import org.neo4j.graphdb.Resource;
 import org.neo4j.io.ByteUnit;
@@ -852,7 +852,7 @@ public class AppendOnlyValuesContainer implements ValuesContainer
         @Override
         public void writeBlob( Blob blob ) throws RuntimeException
         {
-            buf.put( BlobIO.pack( ((BlobWithId) blob).entry() ) );
+            buf.put( BlobIO.pack( (ManagedBlob) blob ) );
         }
     }
 }

@@ -25,7 +25,7 @@ import java.util.UUID
 import org.apache.commons.io.filefilter.TrueFileFilter
 import org.apache.commons.io.{FileUtils, IOUtils}
 import org.neo4j.blob._
-import org.neo4j.blob.impl.{BlobFactory, MimeTypeFactory}
+import org.neo4j.blob.impl.{BlobFactory, BlobIdFactory, MimeTypeFactory}
 import org.neo4j.blob.util.StreamUtils._
 import org.neo4j.blob.util.{Configuration, GlobalContext, Logging}
 import org.neo4j.blob.util.ConfigUtils._
@@ -147,7 +147,7 @@ object BlobStorage extends Logging {
 
     private def readFromBlobFile(blobFile: File): (BlobId, Blob) = {
       val fis = new FileInputStream(blobFile);
-      val blobId = BlobId.readFromStream(fis);
+      val blobId = BlobIdFactory.readFromStream(fis);
       val mimeType = MimeTypeFactory.fromCode(fis.readLong());
       val length = fis.readLong();
       fis.close();

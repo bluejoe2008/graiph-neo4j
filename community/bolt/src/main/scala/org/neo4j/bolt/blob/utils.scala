@@ -25,7 +25,7 @@ import org.apache.commons.codec.digest.DigestUtils
 import org.neo4j.blob.util.ReflectUtils._
 import org.neo4j.blob.util._
 import org.neo4j.blob._
-import org.neo4j.blob.impl.BlobFactory
+import org.neo4j.blob.impl.{BlobFactory, BlobIdFactory}
 import org.neo4j.kernel.api.KernelTransaction
 import org.neo4j.kernel.api.KernelTransaction.CloseListener
 import org.neo4j.kernel.impl.coreapi.{InternalTransaction, TopLevelTransaction}
@@ -43,7 +43,6 @@ object BoltServerBlobIO {
 
   def packBlob(blob: Blob, out: org.neo4j.bolt.v1.packstream.PackOutput): BlobEntry = {
     //create a temp blodid
-    val tempBlobId = BlobId.EMPTY;
     val inline = useInlineAlways || (blob.length <= BlobIO.MAX_INLINE_BLOB_BYTES);
     //write marker
     out.writeByte(if (inline) {
@@ -54,9 +53,12 @@ object BoltServerBlobIO {
     });
 
     //write blob entry
-    val entry = BlobFactory.makeEntry(tempBlobId, blob);
-    BlobIO._pack(entry).foreach(out.writeLong(_));
+    val entry = blob match {
+      case e: BlobEntry => e
+      case _ => BlobFactory.makeEntry(BlobIdFactory.EMPTY, blob)
+    }
 
+    BlobIO._pack(entry).foreach(out.writeLong(_));
     //write inline
     if (inline) {
       val bs = blob.toBytes();
@@ -73,7 +75,7 @@ object BoltServerBlobIO {
       out.writeBytes(bs, 0, bs.length);
     }
 
-    entry;
+    entry
   }
 
   def unpackBlob(unpacker: org.neo4j.bolt.v1.packstream.PackStream.Unpacker): AnyValue = {
