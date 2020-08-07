@@ -40,16 +40,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -65,6 +56,7 @@ import org.neo4j.kernel.api.net.NetworkConnectionTracker;
 import org.neo4j.kernel.configuration.Config;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.LogProvider;
+import org.neo4j.server.configuration.ApplicationContextEnhancer;
 import org.neo4j.server.database.InjectableProvider;
 import org.neo4j.server.plugins.Injectable;
 import org.neo4j.server.security.ssl.SslSocketConnectorFactory;
@@ -105,10 +97,12 @@ public class Jetty9WebServer implements WebServer
     private final SslSocketConnectorFactory sslSocketFactory;
     private final HttpConnectorFactory connectorFactory;
     private final Log log;
+    private final Config neo4jConf;
 
     public Jetty9WebServer( LogProvider logProvider, Config config, NetworkConnectionTracker connectionTracker )
     {
         this.log = logProvider.getLog( getClass() );
+        this.neo4jConf = config;
         sslSocketFactory = new SslSocketConnectorFactory( connectionTracker, config );
         connectorFactory = new HttpConnectorFactory( connectionTracker, config );
     }
@@ -464,6 +458,12 @@ public class Jetty9WebServer implements WebServer
                 addFiltersTo( staticContext );
                 staticContext.addFilter( new FilterHolder( new StaticContentFilter() ), "/*",
                         EnumSet.of( DispatcherType.REQUEST, DispatcherType.FORWARD ) );
+
+                Iterator<ApplicationContextEnhancer> it = ServiceLoader.load(ApplicationContextEnhancer.class).iterator();
+                while(it.hasNext()){
+                    ApplicationContextEnhancer en = it.next();
+                    en.enhance(staticContext, neo4jConf);
+                }
 
                 handlers.addHandler( staticContext );
             }

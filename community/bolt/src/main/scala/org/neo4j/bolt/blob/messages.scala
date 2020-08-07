@@ -21,7 +21,7 @@ package org.neo4j.bolt.blob
 
 import java.io.{ByteArrayInputStream, InputStream}
 
-import org.neo4j.blob.{InputStreamSource, MimeType, Blob, BlobMessageSignature}
+import org.neo4j.blob.{Blob, BlobMessageSignature, InputStreamSource, MimeType}
 import org.neo4j.bolt.messaging.Neo4jPack.Unpacker
 import org.neo4j.bolt.messaging.{RequestMessage, RequestMessageDecoder}
 import org.neo4j.bolt.runtime.BoltResult.Visitor
@@ -29,6 +29,8 @@ import org.neo4j.bolt.runtime._
 import org.neo4j.cypher.result.QueryResult
 import org.neo4j.values.AnyValue
 import org.neo4j.values.storable.Values
+import org.neo4j.blob.util.ReflectUtils._
+import org.neo4j.bolt.v5.BoltStateMachineV5
 
 /**
   * Created by bluejoe on 2019/5/7.
@@ -45,7 +47,7 @@ class GetBlobMessage(val blobId: String) extends RequestMessage with RequestMess
 
   @throws[Exception]
   override def accepts(context: StateMachineContext) = {
-    val opt: Option[Blob] = TransactionalBlobCache.get(blobId)
+    val opt: Option[Blob] = context._get("machine").asInstanceOf[BoltStateMachineV5]._blobCache.get(blobId)
     if (opt.isDefined) {
       context.connectionState.onRecords(new BoltResult() {
         override def fieldNames(): Array[String] = Array("chunk-id", "chunk-start", "chunk-length", "chunk-content", "eof", "total-bytes")

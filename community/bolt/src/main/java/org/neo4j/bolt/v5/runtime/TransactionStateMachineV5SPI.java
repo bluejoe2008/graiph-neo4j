@@ -20,12 +20,12 @@
 package org.neo4j.bolt.v5.runtime;
 
 import org.neo4j.bolt.BoltChannel;
-import org.neo4j.bolt.blob.BoltTransactionListener;
 import org.neo4j.bolt.v3.runtime.TransactionStateMachineV3SPI;
-import org.neo4j.internal.kernel.api.security.LoginContext;
 import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.impl.KernelTransactionEventHub;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.internal.kernel.api.security.LoginContext;
 
 import java.time.Clock;
 import java.time.Duration;
@@ -44,7 +44,7 @@ public class TransactionStateMachineV5SPI extends TransactionStateMachineV3SPI
                                                    Duration txTimeout, Map<String,Object> txMetadata )
     {
         InternalTransaction tx = super.beginTransaction( type, loginContext, txTimeout, txMetadata );
-        BoltTransactionListener.onTransactionCreate( tx );
+        KernelTransactionEventHub.notifyTransactionBegan( tx );
         return tx;
     }
 }

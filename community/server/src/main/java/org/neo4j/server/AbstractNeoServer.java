@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
 
 import org.neo4j.graphdb.DependencyResolver;
 import org.neo4j.graphdb.facade.GraphDatabaseFacadeFactory.Dependencies;
-import org.neo4j.graphdb.factory.StartingMessageFactory;
+import org.neo4j.server.configuration.StartingMessageFactory;
 import org.neo4j.helpers.AdvertisedSocketAddress;
 import org.neo4j.helpers.ListenSocketAddress;
 import org.neo4j.helpers.RunCarefully;
@@ -47,7 +47,6 @@ import org.neo4j.kernel.configuration.HttpConnector;
 import org.neo4j.kernel.configuration.HttpConnector.Encryption;
 import org.neo4j.kernel.configuration.ssl.SslPolicyLoader;
 import org.neo4j.kernel.impl.query.QueryExecutionEngine;
-import org.neo4j.kernel.internal.Version;
 import org.neo4j.kernel.lifecycle.LifeSupport;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 import org.neo4j.logging.Log;

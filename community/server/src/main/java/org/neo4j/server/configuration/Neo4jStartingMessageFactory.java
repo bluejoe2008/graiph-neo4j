@@ -1,4 +1,4 @@
-package org.neo4j.graphdb.factory;
+package org.neo4j.server.configuration;
 
 import org.neo4j.kernel.internal.Version;
 

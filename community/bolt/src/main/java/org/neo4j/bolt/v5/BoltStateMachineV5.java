@@ -20,6 +20,7 @@
 package org.neo4j.bolt.v5;
 
 import org.neo4j.bolt.BoltChannel;
+import org.neo4j.bolt.blob.LaterAccessBlobCache;
 import org.neo4j.bolt.runtime.BoltStateMachineSPI;
 import org.neo4j.bolt.v3.BoltStateMachineV3;
 import org.neo4j.bolt.v3.runtime.ConnectedState;
@@ -30,14 +31,20 @@ import org.neo4j.bolt.v3.runtime.StreamingState;
 import org.neo4j.bolt.v3.runtime.TransactionReadyState;
 import org.neo4j.bolt.v3.runtime.TransactionStreamingState;
 import org.neo4j.bolt.v5.runtime.TransactionReadyStateV5;
+import org.neo4j.kernel.impl.KernelTransactionEventHub;
 
 import java.time.Clock;
 
 public class BoltStateMachineV5 extends BoltStateMachineV3
 {
+    public LaterAccessBlobCache _blobCache = new LaterAccessBlobCache(); //<--pandadb->
+
     public BoltStateMachineV5( BoltStateMachineSPI boltSPI, BoltChannel boltChannel, Clock clock )
     {
         super( boltSPI, boltChannel, clock );
+        //<--pandadb->
+        KernelTransactionEventHub.addListener(_blobCache);
+        //<--pandadb->
     }
 
     @Override

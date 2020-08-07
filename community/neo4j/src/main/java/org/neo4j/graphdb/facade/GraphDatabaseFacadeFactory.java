@@ -186,8 +186,7 @@ public class GraphDatabaseFacadeFactory
         Procedures procedures = setupProcedures( platform, edition, graphDatabaseFacade );
         platform.dependencies.satisfyDependency( new NonTransactionalDbmsOperations( procedures ) );
 
-        //blob support
-        platform.life.add( new ExtendedDatabaseLifecyclePluginsService( procedures, storeDir, config, databaseInfo ) );
+        platform.life.add( new ExtendedDatabaseLifecyclePluginsService( procedures, storeDir, config, databaseInfo ) ); //<--pandadb-->
 
         Logger msgLog = platform.logging.getInternalLog( getClass() ).infoLogger();
         DatabaseManager databaseManager = edition.createDatabaseManager( graphDatabaseFacade, platform, edition, procedures, msgLog );
