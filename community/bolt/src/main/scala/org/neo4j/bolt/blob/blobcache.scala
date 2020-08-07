@@ -31,10 +31,10 @@ import scala.collection.mutable
 //TODO: use BoltTransaction?
 class LaterAccessBlobCache extends KernelTransactionEventListener with Logging {
   //3m
-  val MAX_ALIVE = 3 * 60 * 60 * 1000;
+  val MAX_ALIVE = 3 * 60 * 1000
 
   //5s
-  val CHECK_INTERVAL = 5 * 60 * 1000;
+  val CHECK_INTERVAL = 5 * 1000
 
   case class Entry(id: String, blob: Blob, transactionId: String, time: Long = System.currentTimeMillis()) {
     val expired = time + MAX_ALIVE
