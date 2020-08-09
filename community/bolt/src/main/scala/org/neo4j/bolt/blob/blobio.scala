@@ -31,7 +31,7 @@ import org.neo4j.values.storable.BlobValue
   * Created by bluejoe on 2019/4/3.
   */
 object BoltServerBlobIO {
-  val CHUNK_SIZE = 1024 * 10;
+  val INIT_CHUNK_SIZE = 1024 * 100; //100k
   val useInlineAlways = false;
 
   def packBlob(blob: Blob, out: org.neo4j.bolt.v1.packstream.PackOutput): BlobEntry = {
@@ -61,9 +61,9 @@ object BoltServerBlobIO {
       val handle = KernelTransactionEventHub.cacheBlob(blob);
 
       //pack blob id
-      val bs = handle.getBytes("utf-8");
-      out.writeInt(bs.length);
-      out.writeBytes(bs, 0, bs.length);
+      val bytesHandle = handle.getBytes("utf-8")
+      out.writeInt(bytesHandle.length)
+      out.writeBytes(bytesHandle, 0, bytesHandle.length)
     }
 
     entry

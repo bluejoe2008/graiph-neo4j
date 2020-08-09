@@ -54,34 +54,35 @@ class GetBlobMessage(val blobId: String) extends RequestMessage with RequestMess
 
         override def accept(visitor: Visitor): Unit = {
           val blob = opt.get;
-          val total = blob.length;
-          var transfered = 0L;
+          val lenBlob = blob.length;
 
           blob.offerStream(is => {
-            var i = 0;
-            var read = 0;
-            while (read != -1) {
-              val bs = new Array[Byte](BoltServerBlobIO.CHUNK_SIZE);
-              read = is.read(bs);
-              if (read != -1) {
-                val transfered2 = transfered + read;
+            var i = 0
+            var chunkSize = BoltServerBlobIO.INIT_CHUNK_SIZE
+            var transfered = 0L
+
+            while (transfered < lenBlob) {
+              val bytesChunk = new Array[Byte](chunkSize)
+              val nread = is.read(bytesChunk)
+              if (nread != -1) {
+                val transfered2 = transfered + nread;
                 val record = new QueryResult.Record() {
                   override def fields(): Array[AnyValue] = {
                     Array(Values.of(i),
                       Values.of(transfered),
-                      Values.of(read),
-                      Values.of(if (read == BoltServerBlobIO.CHUNK_SIZE) bs else bs.slice(0, read)),
-                      Values.of(transfered2 == total),
-                      Values.of(blob.length)
+                      Values.of(nread),
+                      Values.of(if (nread == bytesChunk.length) bytesChunk else bytesChunk.slice(0, nread)),
+                      Values.of(transfered2 == lenBlob),
+                      Values.of(lenBlob)
                     );
                   }
                 }
 
-                visitor.visit(record);
-                transfered = transfered2;
-                i += 1;
+                visitor.visit(record)
+                transfered = transfered2
+                i += 1
+                chunkSize *= 2
               }
-
             }
           })
         }
