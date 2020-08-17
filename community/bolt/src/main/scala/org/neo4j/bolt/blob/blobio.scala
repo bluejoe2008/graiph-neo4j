@@ -31,8 +31,9 @@ import org.neo4j.values.storable.BlobValue
   * Created by bluejoe on 2019/4/3.
   */
 object BoltServerBlobIO {
-  val INIT_CHUNK_SIZE = 1024 * 100; //100k
-  val useInlineAlways = false;
+  val INIT_CHUNK_SIZE = 1024 * 100 //100k
+  val MAX_CHUNK_SIZE = 1024 * 1024 * 10 //10m
+  val useInlineAlways = false
 
   def packBlob(blob: Blob, out: org.neo4j.bolt.v1.packstream.PackOutput): BlobEntry = {
     val inline = useInlineAlways || (blob.length <= BlobIO.MAX_INLINE_BLOB_BYTES);

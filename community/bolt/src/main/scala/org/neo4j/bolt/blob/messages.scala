@@ -81,7 +81,8 @@ class GetBlobMessage(val blobId: String) extends RequestMessage with RequestMess
                 visitor.visit(record)
                 transfered = transfered2
                 i += 1
-                chunkSize *= 2
+                if (chunkSize >= BoltServerBlobIO.MAX_CHUNK_SIZE)
+                  chunkSize *= 2
               }
             }
           })
