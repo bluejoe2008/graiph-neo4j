@@ -34,7 +34,7 @@ class SimpleInternalExpressionEvaluator extends InternalExpressionEvaluator {
 
   import SimpleInternalExpressionEvaluator.{COLUMN, CONVERTERS}
 
-  private val parser = new CypherParser()
+  private val parser = CypherParser.get()
 
   override def evaluate(expression: String): AnyValue = {
 

@@ -48,7 +48,7 @@ object IdAnonymizer {
 
 case class IdAnonymizer(tokens: TokenRead) extends QueryAnonymizer {
 
-  private val parser = new CypherParser()
+  private val parser = CypherParser.get()
   private val prettifier = Prettifier(ExpressionStringifier(_.asCanonicalStringVal))
 
   override def queryText(queryText: String): String = {

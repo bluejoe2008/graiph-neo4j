@@ -23,7 +23,7 @@ import org.neo4j.cypher.internal.v3_5.util.symbols._
 
 import scala.util.Try
 
-trait ExtendedExpr {
+trait CustomCheckableExpr {
   def check(ctx: SemanticContext): SemanticCheck
 }
 
@@ -47,10 +47,8 @@ object SemanticExpressionCheck extends SemanticAnalysisTooling {
     */
   def check(ctx: SemanticContext, expression: Expression): SemanticCheck =
     expression match {
-      case x: BlobLiteralExpr =>
-        expectType(CTBlob, x)
 
-      case x: ExtendedExpr =>
+      case x: CustomCheckableExpr =>
         x.check(ctx)
 
         // ARITHMETICS

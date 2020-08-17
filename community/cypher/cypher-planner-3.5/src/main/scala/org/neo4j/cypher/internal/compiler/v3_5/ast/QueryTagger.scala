@@ -326,7 +326,7 @@ object QueryTagger extends QueryTagger[String] {
   case class fromString(next: QueryTagger[Statement])
     extends QueryTagger[String] {
 
-    val parser = new CypherParser
+    val parser = CypherParser.get()
 
     def apply(queryText: String): Set[QueryTag] = next(parser.parse(queryText))
   }

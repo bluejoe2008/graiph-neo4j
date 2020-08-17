@@ -17,11 +17,11 @@
 package org.neo4j.cypher.internal.v3_5.frontend.phases
 
 import org.neo4j.cypher.internal.v3_5.ast.Statement
-import org.neo4j.cypher.internal.v3_5.parser.CypherParser
+import org.neo4j.cypher.internal.v3_5.parser.{CypherParser}
 import org.neo4j.cypher.internal.v3_5.frontend.phases.CompilationPhaseTracer.CompilationPhase.PARSING
 
 case object Parsing extends Phase[BaseContext, BaseState, BaseState] {
-  private val parser = new CypherParser
+  private val parser = CypherParser.get()
 
   override def process(in: BaseState, ignored: BaseContext): BaseState =
     in.withStatement(parser.parse(in.queryText, in.startPosition))

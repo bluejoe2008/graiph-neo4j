@@ -65,7 +65,7 @@ import scala.reflect.ClassTag
 trait LogicalPlanningTestSupport2 extends CypherTestSupport with AstConstructionTestSupport with LogicalPlanConstructionTestSupport {
   self: CypherFunSuite =>
 
-  var parser = new CypherParser
+  var parser = CypherParser.get()
   val rewriterSequencer: String => ValidatingRewriterStepSequencer = RewriterStepSequencer.newValidating
   var astRewriter = new ASTRewriter(rewriterSequencer, literalExtraction = Never, getDegreeRewriting = true)
   final var planner = QueryPlanner()

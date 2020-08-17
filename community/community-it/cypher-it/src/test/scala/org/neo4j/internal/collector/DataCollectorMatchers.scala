@@ -238,7 +238,7 @@ object DataCollectorMatchers {
 
   case class BeCypherMatcher(expected: String) extends Matcher[AnyRef] {
 
-    val parser = new CypherParser
+    val parser = CypherParser.get()
     private val expectedAst = parser.parse(preParser.preParseQuery(expected, false).statement)
 
     override def apply(left: AnyRef): MatchResult =

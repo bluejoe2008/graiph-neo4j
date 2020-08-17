@@ -23,5 +23,5 @@ object ParserFixture extends MockitoSugar {
 
   def parse(a: String): ast.Statement = parser.parse(a)
 
-  val parser = new CypherParser
+  val parser = CypherParser.get()
 }

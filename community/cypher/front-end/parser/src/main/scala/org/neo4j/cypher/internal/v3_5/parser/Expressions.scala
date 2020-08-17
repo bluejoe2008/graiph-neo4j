@@ -18,67 +18,11 @@ package org.neo4j.cypher.internal.v3_5.parser
 
 import org.neo4j.cypher.internal.v3_5.expressions._
 import org.neo4j.cypher.internal.v3_5.util.InputPosition
-import org.neo4j.cypher.internal.v3_5.{expressions}
+import org.neo4j.cypher.internal.v3_5.expressions
 import org.neo4j.cypher.internal.v3_5.{expressions => ast}
 import org.parboiled.scala._
 
 import scala.collection.mutable.ListBuffer
-
-object ExprExtensions extends Expressions {
-  private var _expr2: (Rule1[ast.Expression]) => Rule1[ast.Expression] =
-    (Expression1: Rule1[ast.Expression]) => rule("an expression") {
-      Expression1 ~ zeroOrMore(WS ~ (
-        PropertyLookup
-          | NodeLabels ~~>> (ast.HasLabels(_: ast.Expression, _))
-          | "[" ~~ Expression ~~ "]" ~~>> (ast.ContainerIndex(_: ast.Expression, _))
-          | "[" ~~ optional(Expression) ~~ ".." ~~ optional(Expression) ~~ "]" ~~>> (ast.ListSlice(_: ast.Expression, _, _))
-        ))
-    }
-
-  private var _expr3: (Rule1[ast.Expression]) => Rule1[ast.Expression] =
-    (Expression2: Rule1[ast.Expression]) => rule("an expression") {
-      Expression2 ~ zeroOrMore(WS ~ (
-        group(operator("=~") ~~ Expression2) ~~>> (expressions.RegexMatch(_: ast.Expression, _))
-          | group(keyword("IN") ~~ Expression2) ~~>> (expressions.In(_: ast.Expression, _))
-          | group(keyword("STARTS WITH") ~~ Expression2) ~~>> (expressions.StartsWith(_: ast.Expression, _))
-          | group(keyword("ENDS WITH") ~~ Expression2) ~~>> (expressions.EndsWith(_: ast.Expression, _))
-          | group(keyword("CONTAINS") ~~ Expression2) ~~>> (expressions.Contains(_: ast.Expression, _))
-          | keyword("IS NULL") ~~>> (expressions.IsNull(_: ast.Expression))
-          | keyword("IS NOT NULL") ~~>> (expressions.IsNotNull(_: ast.Expression))
-        ): ReductionRule1[ast.Expression, ast.Expression])
-    }
-
-  def extendsExpr2(extendedExpr: (Rule1[ast.Expression]) => ReductionRule1[ast.Expression, Expression]) = {
-    _expr2 = (Expression1: Rule1[ast.Expression]) => rule("an expression") {
-      Expression1 ~ zeroOrMore(WS ~ (
-        extendedExpr(Expression1)
-          | PropertyLookup
-          | NodeLabels ~~>> (ast.HasLabels(_: ast.Expression, _))
-          | "[" ~~ Expression ~~ "]" ~~>> (ast.ContainerIndex(_: ast.Expression, _))
-          | "[" ~~ optional(Expression) ~~ ".." ~~ optional(Expression) ~~ "]" ~~>> (ast.ListSlice(_: ast.Expression, _, _))
-        ))
-    }
-  }
-
-  def extendsExpr3(extendedExpr: (Rule1[ast.Expression]) => rules.ReductionRule1[Expression, Expression]) = {
-    _expr3 = (Expression2: Rule1[ast.Expression]) => rule("an expression") {
-      Expression2 ~ zeroOrMore(WS ~ (
-        extendedExpr(Expression2)
-          | group(operator("=~") ~~ Expression2) ~~>> (expressions.RegexMatch(_: ast.Expression, _))
-          | group(keyword("IN") ~~ Expression2) ~~>> (expressions.In(_: ast.Expression, _))
-          | group(keyword("STARTS WITH") ~~ Expression2) ~~>> (expressions.StartsWith(_: ast.Expression, _))
-          | group(keyword("ENDS WITH") ~~ Expression2) ~~>> (expressions.EndsWith(_: ast.Expression, _))
-          | group(keyword("CONTAINS") ~~ Expression2) ~~>> (expressions.Contains(_: ast.Expression, _))
-          | keyword("IS NULL") ~~>> (expressions.IsNull(_: ast.Expression))
-          | keyword("IS NOT NULL") ~~>> (expressions.IsNotNull(_: ast.Expression))
-        ): ReductionRule1[ast.Expression, ast.Expression])
-    }
-  }
-
-  def makeExpression3(Expression2: Rule1[ast.Expression]) = _expr3(Expression2);
-
-  def makeExpression2(Expression1: Rule1[ast.Expression]) = _expr2(Expression1);
-}
 
 trait Expressions extends Parser
   with Literals
@@ -89,40 +33,40 @@ trait Expressions extends Parser
 
   def Expression = Expression12
 
-  private def Expression12: Rule1[ast.Expression] = rule("an expression") {
+  def Expression12: Rule1[ast.Expression] = rule("an expression") {
     Expression11 ~ zeroOrMore(WS ~ (
       group(keyword("OR") ~~ Expression11) ~~>> (Or(_: ast.Expression, _))
       ): ReductionRule1[ast.Expression, ast.Expression])
   }
 
-  private def Expression11: Rule1[ast.Expression] = rule("an expression") {
+  def Expression11: Rule1[ast.Expression] = rule("an expression") {
     Expression10 ~ zeroOrMore(WS ~ (
       group(keyword("XOR") ~~ Expression10) ~~>> (expressions.Xor(_: ast.Expression, _))
       ): ReductionRule1[ast.Expression, ast.Expression])
   }
 
-  private def Expression10: Rule1[ast.Expression] = rule("an expression") {
+  def Expression10: Rule1[ast.Expression] = rule("an expression") {
     Expression9 ~ zeroOrMore(WS ~ (
       group(keyword("AND") ~~ Expression9) ~~>> (And(_: ast.Expression, _))
       ): ReductionRule1[ast.Expression, ast.Expression])
   }
 
-  private def Expression9: Rule1[ast.Expression] = rule("an expression")(
+  def Expression9: Rule1[ast.Expression] = rule("an expression")(
     group(keyword("NOT") ~~ Expression9) ~~>> (expressions.Not(_))
       | Expression8
   )
 
-  private def Expression8: Rule1[ast.Expression] = rule("comparison expression") {
+  def Expression8: Rule1[ast.Expression] = rule("comparison expression") {
     val produceComparisons: (ast.Expression, List[PartialComparison]) => InputPosition => ast.Expression = comparisons
     Expression7 ~ zeroOrMore(WS ~ PartialComparisonExpression) ~~>> produceComparisons
   }
 
-  private case class PartialComparison(op: (ast.Expression, ast.Expression) => (InputPosition) => ast.Expression,
-                                       expr: ast.Expression, pos: InputPosition) {
+  case class PartialComparison(op: (ast.Expression, ast.Expression) => (InputPosition) => ast.Expression,
+                               expr: ast.Expression, pos: InputPosition) {
     def apply(lhs: ast.Expression) = op(lhs, expr)(pos)
   }
 
-  private def PartialComparisonExpression: Rule1[PartialComparison] = (
+  def PartialComparisonExpression: Rule1[PartialComparison] = (
     group(operator("=") ~~ Expression7) ~~>> { expr: ast.Expression => pos: InputPosition => PartialComparison(eq, expr, pos) }
       | group(operator("~") ~~ Expression7) ~~>> { expr: ast.Expression => pos: InputPosition => PartialComparison(eqv, expr, pos) }
       | group(operator("<>") ~~ Expression7) ~~>> { expr: ast.Expression => pos: InputPosition => PartialComparison(ne, expr, pos) }
@@ -132,23 +76,23 @@ trait Expressions extends Parser
       | group(operator("<=") ~~ Expression7) ~~>> { expr: ast.Expression => pos: InputPosition => PartialComparison(lte, expr, pos) }
       | group(operator(">=") ~~ Expression7) ~~>> { expr: ast.Expression => pos: InputPosition => PartialComparison(gte, expr, pos) })
 
-  private def eq(lhs: ast.Expression, rhs: ast.Expression): InputPosition => ast.Expression = expressions.Equals(lhs, rhs)
+  def eq(lhs: ast.Expression, rhs: ast.Expression): InputPosition => ast.Expression = expressions.Equals(lhs, rhs)
 
-  private def eqv(lhs: ast.Expression, rhs: ast.Expression): InputPosition => ast.Expression = ast.Equivalent(lhs, rhs)
+  def eqv(lhs: ast.Expression, rhs: ast.Expression): InputPosition => ast.Expression = ast.Equivalent(lhs, rhs)
 
-  private def ne(lhs: ast.Expression, rhs: ast.Expression): InputPosition => ast.Expression = expressions.NotEquals(lhs, rhs)
+  def ne(lhs: ast.Expression, rhs: ast.Expression): InputPosition => ast.Expression = expressions.NotEquals(lhs, rhs)
 
-  private def bne(lhs: ast.Expression, rhs: ast.Expression): InputPosition => ast.Expression = expressions.InvalidNotEquals(lhs, rhs)
+  def bne(lhs: ast.Expression, rhs: ast.Expression): InputPosition => ast.Expression = expressions.InvalidNotEquals(lhs, rhs)
 
-  private def lt(lhs: ast.Expression, rhs: ast.Expression): InputPosition => ast.Expression = expressions.LessThan(lhs, rhs)
+  def lt(lhs: ast.Expression, rhs: ast.Expression): InputPosition => ast.Expression = expressions.LessThan(lhs, rhs)
 
-  private def gt(lhs: ast.Expression, rhs: ast.Expression): InputPosition => ast.Expression = expressions.GreaterThan(lhs, rhs)
+  def gt(lhs: ast.Expression, rhs: ast.Expression): InputPosition => ast.Expression = expressions.GreaterThan(lhs, rhs)
 
-  private def lte(lhs: ast.Expression, rhs: ast.Expression): InputPosition => ast.Expression = expressions.LessThanOrEqual(lhs, rhs)
+  def lte(lhs: ast.Expression, rhs: ast.Expression): InputPosition => ast.Expression = expressions.LessThanOrEqual(lhs, rhs)
 
-  private def gte(lhs: ast.Expression, rhs: ast.Expression): InputPosition => ast.Expression = expressions.GreaterThanOrEqual(lhs, rhs)
+  def gte(lhs: ast.Expression, rhs: ast.Expression): InputPosition => ast.Expression = expressions.GreaterThanOrEqual(lhs, rhs)
 
-  private def comparisons(first: ast.Expression, rest: List[PartialComparison]): InputPosition => ast.Expression = {
+  def comparisons(first: ast.Expression, rest: List[PartialComparison]): InputPosition => ast.Expression = {
     rest match {
       case Nil => _ => first
       case second :: Nil => _ => second(first)
@@ -163,14 +107,14 @@ trait Expressions extends Parser
     }
   }
 
-  private def Expression7: Rule1[ast.Expression] = rule("an expression") {
+  def Expression7: Rule1[ast.Expression] = rule("an expression") {
     Expression6 ~ zeroOrMore(WS ~ (
       group(operator("+") ~~ Expression6) ~~>> (ast.Add(_: ast.Expression, _))
         | group(operator("-") ~~ Expression6) ~~>> (ast.Subtract(_: ast.Expression, _))
       ))
   }
 
-  private def Expression6: Rule1[ast.Expression] = rule("an expression") {
+  def Expression6: Rule1[ast.Expression] = rule("an expression") {
     Expression5 ~ zeroOrMore(WS ~ (
       group(operator("*") ~~ Expression5) ~~>> (ast.Multiply(_: ast.Expression, _))
         | group(operator("/") ~~ Expression5) ~~>> (ast.Divide(_: ast.Expression, _))
@@ -178,51 +122,42 @@ trait Expressions extends Parser
       ))
   }
 
-  private def Expression5: Rule1[ast.Expression] = rule("an expression") {
+  def Expression5: Rule1[ast.Expression] = rule("an expression") {
     Expression4 ~ zeroOrMore(WS ~ (
       group(operator("^") ~~ Expression4) ~~>> (ast.Pow(_: ast.Expression, _))
       ))
   }
 
-  private def Expression4: Rule1[ast.Expression] = rule("an expression")(
+  def Expression4: Rule1[ast.Expression] = rule("an expression")(
     Expression3
       | group(operator("+") ~~ Expression4) ~~>> (ast.UnaryAdd(_))
       | group(operator("-") ~~ Expression4) ~~>> (ast.UnarySubtract(_))
   )
 
-  //ExprExtensions
-  private def Expression3: Rule1[ast.Expression] = ExprExtensions.makeExpression3(Expression2)
+  def Expression3: Rule1[org.neo4j.cypher.internal.v3_5.expressions.Expression] = rule("an expression") {
+    Expression2 ~ zeroOrMore(WS ~ (
+      group(operator("=~") ~~ Expression2) ~~>> (expressions.RegexMatch(_: org.neo4j.cypher.internal.v3_5.expressions.Expression, _))
+        | group(keyword("IN") ~~ Expression2) ~~>> (expressions.In(_: org.neo4j.cypher.internal.v3_5.expressions.Expression, _))
+        | group(keyword("STARTS WITH") ~~ Expression2) ~~>> (expressions.StartsWith(_: org.neo4j.cypher.internal.v3_5.expressions.Expression, _))
+        | group(keyword("ENDS WITH") ~~ Expression2) ~~>> (expressions.EndsWith(_: org.neo4j.cypher.internal.v3_5.expressions.Expression, _))
+        | group(keyword("CONTAINS") ~~ Expression2) ~~>> (expressions.Contains(_: org.neo4j.cypher.internal.v3_5.expressions.Expression, _))
+        | keyword("IS NULL") ~~>> (expressions.IsNull(_: org.neo4j.cypher.internal.v3_5.expressions.Expression))
+        | keyword("IS NOT NULL") ~~>> (expressions.IsNotNull(_: org.neo4j.cypher.internal.v3_5.expressions.Expression))
+      ): ReductionRule1[org.neo4j.cypher.internal.v3_5.expressions.Expression, org.neo4j.cypher.internal.v3_5.expressions.Expression])
+  }
 
-  private def Expression2: Rule1[ast.Expression] = ExprExtensions.makeExpression2(Expression1)
+  def Expression2: Rule1[org.neo4j.cypher.internal.v3_5.expressions.Expression] = rule("an expression") {
+    Expression1 ~ zeroOrMore(WS ~ (
+      PropertyLookup
+        | NodeLabels ~~>> (ast.HasLabels(_: org.neo4j.cypher.internal.v3_5.expressions.Expression, _))
+        | "[" ~~ Expression ~~ "]" ~~>> (ast.ContainerIndex(_: org.neo4j.cypher.internal.v3_5.expressions.Expression, _))
+        | "[" ~~ optional(Expression) ~~ ".." ~~ optional(Expression) ~~ "]" ~~>> (ast.ListSlice(_: org.neo4j.cypher.internal.v3_5.expressions.Expression, _, _))
+      ))
+  }
 
-  //NOTE: <blobUrlPath>
-  private def BlobURLPath: Rule1[String] = rule("<blob url path>")(
-    push(new java.lang.StringBuilder) ~ zeroOrMore(
-      !(RightArrowHead) ~ ANY
-        ~:% withContext(appendToStringBuilder(_)(_))
-    )
-      ~~> (_.toString())
-  )
-
-  private def BlobLiteral: Rule1[BlobLiteralExpr] = rule("<blob>")(
-    LeftArrowHead ~ ignoreCase("FILE://") ~ BlobURLPath ~ RightArrowHead
-      ~~>> (x => BlobLiteralExpr(BlobFileURL(x)))
-      | LeftArrowHead ~ ignoreCase("BASE64://") ~ BlobURLPath ~ RightArrowHead
-      ~~>> (x => BlobLiteralExpr(BlobBase64URL(x.mkString(""))))
-      | LeftArrowHead ~ ignoreCase("HTTP://") ~ BlobURLPath ~ RightArrowHead
-      ~~>> (x => BlobLiteralExpr(BlobHttpURL(s"http://${x.mkString("")}")))
-      | LeftArrowHead ~ ignoreCase("HTTPS://") ~ BlobURLPath ~ RightArrowHead
-      ~~>> (x => BlobLiteralExpr(BlobHttpURL(s"https://${x.mkString("")}")))
-      | LeftArrowHead ~ ignoreCase("FTP://") ~ BlobURLPath ~ RightArrowHead
-      ~~>> (x => BlobLiteralExpr(BlobFtpURL(s"ftp://${x.mkString("")}")))
-      | LeftArrowHead ~ ignoreCase("SFTP://") ~ BlobURLPath ~ RightArrowHead
-      ~~>> (x => BlobLiteralExpr(BlobFtpURL(s"sftp://${x.mkString("")}")))
-  )
-
-  private def Expression1: Rule1[ast.Expression] = rule("an expression")(
+  def Expression1: Rule1[ast.Expression] = rule("an expression")(
     NumberLiteral
       | StringLiteral
-      | BlobLiteral
       | Parameter
       | keyword("TRUE") ~ push(ast.True()(_))
       | keyword("FALSE") ~ push(ast.False()(_))
@@ -258,10 +193,10 @@ trait Expressions extends Parser
     operator(".") ~~ (PropertyKeyName ~~>> (ast.Property(_: ast.Expression, _)))
   }
 
-  private def FilterExpression: Rule3[Variable, ast.Expression, Option[ast.Expression]] =
+  def FilterExpression: Rule3[Variable, ast.Expression, Option[ast.Expression]] =
     IdInColl ~ optional(WS ~ keyword("WHERE") ~~ Expression)
 
-  private def IdInColl: Rule2[Variable, ast.Expression] =
+  def IdInColl: Rule2[Variable, ast.Expression] =
     Variable ~~ keyword("IN") ~~ Expression
 
   def FunctionInvocation: Rule1[org.neo4j.cypher.internal.v3_5.expressions.FunctionInvocation] = rule("a function") {
@@ -290,7 +225,7 @@ trait Expressions extends Parser
     ) memoMismatches) ~~>> (ast.CaseExpression(_, _, _))
   }
 
-  private def CaseAlternatives: Rule2[ast.Expression, ast.Expression] = rule("WHEN") {
+  def CaseAlternatives: Rule2[ast.Expression, ast.Expression] = rule("WHEN") {
     keyword("WHEN") ~~ Expression ~~ keyword("THEN") ~~ Expression
   }
 }

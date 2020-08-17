@@ -22,33 +22,12 @@ package org.neo4j.kernel.impl.blob
 import java.io.{File, FileInputStream, FileOutputStream, InputStream}
 import java.util.UUID
 
-import org.apache.commons.io.filefilter.TrueFileFilter
-import org.apache.commons.io.{FileUtils, IOUtils}
+import org.apache.commons.io.IOUtils
 import org.neo4j.blob._
 import org.neo4j.blob.impl.{BlobFactory, BlobIdFactory, MimeTypeFactory}
+import org.neo4j.blob.util.ConfigUtils._
 import org.neo4j.blob.util.StreamUtils._
 import org.neo4j.blob.util.{Configuration, GlobalContext, Logging}
-import org.neo4j.blob.util.ConfigUtils._
-
-import scala.collection.JavaConversions._
-
-trait BlobStorage extends BatchBlobValueStorage {
-  def save(blob: Blob): BlobId;
-
-  def load(id: BlobId): Option[Blob];
-
-  def delete(id: BlobId): Unit;
-}
-
-trait BatchBlobValueStorage extends Closable {
-  def saveBatch(blobs: Iterable[Blob]): Iterable[BlobId];
-
-  def loadBatch(ids: Iterable[BlobId]): Iterable[Option[Blob]];
-
-  def deleteBatch(ids: Iterable[BlobId]): Unit;
-
-  def iterator(): Iterator[(BlobId, Blob)];
-}
 
 trait Closable {
   def initialize(storeDir: File, conf: Configuration): Unit;
@@ -56,84 +35,54 @@ trait Closable {
   def disconnect(): Unit;
 }
 
+trait BlobStorage extends Closable {
+  def save(blob: Blob): BlobId;
+
+  def load(id: BlobId): Option[Blob];
+
+  def delete(id: BlobId): Unit;
+}
+
 object BlobStorage extends Logging {
-  def of(bbvs: BatchBlobValueStorage) = {
-    logger.info(s"using batch blob storage: ${bbvs}");
-
-    new BlobStorage {
-      override def delete(blobId: BlobId): Unit = {
-        logger.debug(s"deleting blob: ${blobId.asLiteralString()}");
-
-        bbvs.deleteBatch(Array(blobId))
-      }
-
-      override def load(blobId: BlobId): Option[Blob] = bbvs.loadBatch(Array(blobId)).head
-
-      override def save(blob: Blob): BlobId = {
-        bbvs.saveBatch(Array(blob)).head
-      }
-
-      override def deleteBatch(ids: Iterable[BlobId]): Unit = {
-        logger.debug(s"deleting blob: ${ids.map(_.asLiteralString)}");
-
-        bbvs.deleteBatch(ids)
-      }
-
-      override def saveBatch(blobs: Iterable[Blob]): Iterable[BlobId] = {
-        bbvs.saveBatch(blobs)
-      }
-
-      override def loadBatch(ids: Iterable[BlobId]): Iterable[Option[Blob]] = bbvs.loadBatch(ids)
-
-      override def disconnect(): Unit = bbvs.disconnect()
-
-      override def initialize(storeDir: File, conf: Configuration): Unit = bbvs.initialize(storeDir, conf)
-
-      override def iterator(): Iterator[(BlobId, Blob)] = bbvs.iterator();
-    };
-  }
-
   def create(conf: Configuration): BlobStorage =
-    of(create(conf.getRaw("blob.storage")));
+    create(conf.getRaw("blob.storage"));
 
-  def create(blobStorageClassName: Option[String]): BatchBlobValueStorage = {
-    blobStorageClassName.map(Class.forName(_).newInstance().asInstanceOf[BatchBlobValueStorage])
+  def create(blobStorageClassName: Option[String]): BlobStorage = {
+    blobStorageClassName.map(Class.forName(_).newInstance().asInstanceOf[BlobStorage])
       .getOrElse(createDefault())
   }
 
-  class DefaultLocalFileSystemBlobValueStorage extends BatchBlobValueStorage with Logging {
+  class DefaultLocalFileSystemBlobValueStorage extends BlobStorage with Logging {
     var _rootDir: File = _;
 
-    override def saveBatch(blobs: Iterable[Blob]) = {
-      blobs.map(blob => {
-        val bid = generateId();
-        val file = locateFile(bid);
-        file.getParentFile.mkdirs();
+    override def save(blob: Blob): BlobId = {
+      val bid = generateId();
+      val file = locateFile(bid);
+      file.getParentFile.mkdirs();
 
-        val fos = new FileOutputStream(file);
-        fos.write(bid.asByteArray());
-        fos.writeLong(blob.mimeType.code);
-        fos.writeLong(blob.length);
+      val fos = new FileOutputStream(file);
+      fos.write(bid.asByteArray());
+      fos.writeLong(blob.mimeType.code);
+      fos.writeLong(blob.length);
 
-        blob.offerStream { bis =>
-          IOUtils.copy(bis, fos);
-        }
-        fos.close();
-
-        bid;
+      blob.offerStream { bis =>
+        IOUtils.copy(bis, fos);
       }
-      )
+      fos.close();
+
+      bid;
     }
 
-    override def loadBatch(ids: Iterable[BlobId]): Iterable[Option[Blob]] = {
-      ids.map(id => Some(readFromBlobFile(locateFile(id))._2));
+    override def load(id: BlobId): Option[Blob] = {
+      val file = locateFile(id)
+      if (file.exists())
+        Some(readFromBlobFile(file)._2)
+      else
+        None
     }
 
-    override def deleteBatch(ids: Iterable[BlobId]) = {
-      ids.foreach { id =>
-        locateFile(id).delete()
-      }
-    }
+    override def delete(id: BlobId): Unit =
+      locateFile(id).delete()
 
     private def generateId(): BlobId = {
       val uuid = UUID.randomUUID()
@@ -175,18 +124,12 @@ object BlobStorage extends Logging {
 
     override def disconnect(): Unit = {
     }
-
-    override def iterator(): Iterator[(BlobId, Blob)] = {
-      FileUtils.iterateFiles(_rootDir, TrueFileFilter.TRUE, TrueFileFilter.TRUE).map {
-        readFromBlobFile(_)
-      }
-    }
   }
 
-  def createDefault(): BatchBlobValueStorage = {
+  def createDefault(): BlobStorage = {
     //will read "default-blob-value-storage-class" entry first
     GlobalContext.getOption("default-blob-value-storage-class")
-      .map(Class.forName(_).newInstance().asInstanceOf[BatchBlobValueStorage])
+      .map(Class.forName(_).newInstance().asInstanceOf[BlobStorage])
       .getOrElse(new DefaultLocalFileSystemBlobValueStorage())
   }
 }

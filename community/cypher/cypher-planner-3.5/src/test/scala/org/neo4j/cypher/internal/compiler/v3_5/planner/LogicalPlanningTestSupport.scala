@@ -54,7 +54,7 @@ trait LogicalPlanningTestSupport extends CypherTestSupport with AstConstructionT
   self: CypherFunSuite =>
 
   val monitors = mock[Monitors]
-  val parser = new CypherParser
+  val parser = CypherParser.get()
   val rewriterSequencer = RewriterStepSequencer.newValidating _
   val astRewriter = new ASTRewriter(rewriterSequencer, literalExtraction = Never, getDegreeRewriting = true)
   val mockRel = newPatternRelationship("a", "b", "r")

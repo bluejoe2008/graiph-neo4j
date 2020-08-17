@@ -26,7 +26,7 @@ class PrettifierIT extends CypherFunSuite {
 
   val prettifier: Prettifier = Prettifier(ExpressionStringifier())
 
-  val parser = new CypherParser
+  val parser = CypherParser.get()
   val tests: Seq[(String, String)] =
     Seq[(String, String)](
       "return 42" -> "RETURN 42",

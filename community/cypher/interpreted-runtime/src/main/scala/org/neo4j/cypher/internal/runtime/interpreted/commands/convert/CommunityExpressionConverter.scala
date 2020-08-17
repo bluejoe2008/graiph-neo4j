@@ -21,7 +21,7 @@ package org.neo4j.cypher.internal.runtime.interpreted.commands.convert
 
 import org.neo4j.cypher.internal.planner.v3_5.spi.TokenContext
 import org.neo4j.cypher.internal.runtime.interpreted._
-import org.neo4j.cypher.internal.runtime.interpreted.commands.expressions.{Expression => CommandExpression, BlobLiteralCommand, InequalitySeekRangeExpression, PointDistanceSeekRangeExpression}
+import org.neo4j.cypher.internal.runtime.interpreted.commands.expressions.{Expression => CommandExpression, InequalitySeekRangeExpression, PointDistanceSeekRangeExpression}
 import org.neo4j.cypher.internal.runtime.interpreted.commands.predicates.Predicate
 import org.neo4j.cypher.internal.runtime.interpreted.commands.values.TokenType.PropertyKey
 import org.neo4j.cypher.internal.runtime.interpreted.commands.values.UnresolvedRelType
@@ -40,8 +40,8 @@ import org.neo4j.cypher.internal.v3_5.util.InternalException
 import org.neo4j.cypher.internal.v3_5.util.NonEmptyList
 import org.neo4j.cypher.internal.v3_5.{expressions => ast}
 
-trait ExtendedCommandExpr {
-  def makeCommand(id: Id, self: ExpressionConverters): CommandExpression
+trait CustomConvertableExpr {
+  def convert(id: Id, self: ExpressionConverters): CommandExpression
 }
 
 case class CommunityExpressionConverter(tokenContext: TokenContext) extends ExpressionConverter {
@@ -57,8 +57,7 @@ case class CommunityExpressionConverter(tokenContext: TokenContext) extends Expr
   override def toCommandExpression(id: Id, expression: ast.Expression,
                                    self: ExpressionConverters): Option[CommandExpression] = {
     val result = expression match {
-      case e: ast.BlobLiteralExpr => new BlobLiteralCommand(e.value)
-      case e: ExtendedCommandExpr => e.makeCommand(id, self)
+      case e: CustomConvertableExpr => e.convert(id, self)
 
       case e: ast.Null => commandexpressions.Null()
       case e: ast.True => predicates.True()

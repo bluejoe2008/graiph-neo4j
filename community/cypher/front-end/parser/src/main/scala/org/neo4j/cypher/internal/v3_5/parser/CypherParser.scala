@@ -16,22 +16,31 @@
  */
 package org.neo4j.cypher.internal.v3_5.parser
 
+import java.util.ServiceLoader
+
 import org.neo4j.cypher.internal.v3_5.ast
 import org.neo4j.cypher.internal.v3_5.util.{InputPosition, SyntaxException}
 import org.parboiled.scala._
 
-class CypherParser extends Parser
+trait CypherParser extends Parser
   with Statement
   with Expressions {
 
+  private val _statements: Rule1[Seq[ast.Statement]] = rule {
+    oneOrMore(WS ~ Statement ~ WS, separator = ch(';')) ~~ optional(ch(';')) ~~ EOI.label("end of input")
+  }
 
   @throws(classOf[SyntaxException])
   def parse(queryText: String, offset: Option[InputPosition] = None): ast.Statement =
-    parseOrThrow(queryText, offset, CypherParser.Statements)
+    parseOrThrow(queryText, offset, _statements)
+}
+
+class DefaultCypherParser extends CypherParser {
+
 }
 
 object CypherParser extends Parser with Statement with Expressions {
-  val Statements: Rule1[Seq[ast.Statement]] = rule {
-    oneOrMore(WS ~ Statement ~ WS, separator = ch(';')) ~~ optional(ch(';')) ~~ EOI.label("end of input")
-  }
+  private val parser = ServiceLoader.load(classOf[CypherParser]).iterator().next()
+
+  def get(): CypherParser = parser
 }
