@@ -56,7 +56,6 @@ import org.neo4j.values.storable.ArrayValue;
 import org.neo4j.values.storable.CoordinateReferenceSystem;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
-
 import static org.neo4j.kernel.impl.store.DynamicArrayStore.getRightArray;
 import static org.neo4j.kernel.impl.store.NoStoreHeaderFormat.NO_STORE_HEADER_FORMAT;
 import static org.neo4j.kernel.impl.store.record.AbstractBaseRecord.NO_ID;
@@ -748,8 +747,7 @@ public class PropertyStore extends CommonAbstractStore<PropertyRecord,NoStoreHea
             else if ( typeId == PropertyType.BLOB.intValue() )
             {
                 int arrayLength = buffer.getInt();
-                Blob[] result = StoreBlobIO.readBlobArray( ic, buffer, arrayLength );
-                return Values.blobArray(result);
+                return StoreBlobIO.readBlobArray(ic, buffer, arrayLength);
             }
             else if ( typeId == PropertyType.GEOMETRY.intValue() )
             {

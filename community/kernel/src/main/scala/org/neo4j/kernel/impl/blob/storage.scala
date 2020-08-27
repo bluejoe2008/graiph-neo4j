@@ -19,14 +19,13 @@
  */
 package org.neo4j.kernel.impl.blob
 
-import java.io.{File, FileInputStream, FileOutputStream, InputStream}
+import java.io.{DataInputStream, DataOutputStream, File, FileInputStream, FileOutputStream, InputStream}
 import java.util.UUID
 
 import org.apache.commons.io.IOUtils
 import org.neo4j.blob._
-import org.neo4j.blob.impl.{BlobFactory, BlobIdFactory, MimeTypeFactory}
+import org.neo4j.blob.impl.{BlobFactory, MimeTypeFactory}
 import org.neo4j.blob.util.ConfigUtils._
-import org.neo4j.blob.util.StreamUtils._
 import org.neo4j.blob.util.{Configuration, GlobalContext, Logging}
 
 trait Closable {
@@ -36,11 +35,17 @@ trait Closable {
 }
 
 trait BlobStorage extends Closable {
-  def save(blob: Blob): BlobId;
+  def save(blob: Blob): BlobId
 
-  def load(id: BlobId): Option[Blob];
+  def load(bid: BlobId): Option[Blob]
 
-  def delete(id: BlobId): Unit;
+  def delete(bid: BlobId): Unit
+
+  def loadGroup(gid: BlobId): Option[Array[Blob]]
+
+  def saveGroup(blobs: Array[Blob]): BlobId
+
+  def deleteGroup(gid: BlobId): Unit
 }
 
 object BlobStorage extends Logging {
@@ -52,51 +57,47 @@ object BlobStorage extends Logging {
       .getOrElse(createDefault())
   }
 
-  class DefaultLocalFileSystemBlobValueStorage extends BlobStorage with Logging {
-    var _rootDir: File = _;
+  def createDefault(): BlobStorage = {
+    //will read "default-blob-value-storage-class" entry first
+    GlobalContext.getOption("default-blob-value-storage-class")
+      .map(Class.forName(_).newInstance().asInstanceOf[BlobStorage])
+      .getOrElse(new LocalFileSystemBlobValueStorage())
+  }
+}
 
-    override def save(blob: Blob): BlobId = {
-      val bid = generateId();
-      val file = locateFile(bid);
-      file.getParentFile.mkdirs();
+class LocalFileSystemBlobValueStorage extends BlobStorage with Logging {
+  var _rootDir: File = _;
+  private final val HEADER_SINGLE_BLOB_STORE: Byte = 0
+  private final val HEADER_BLOB_ARRAY_STORE: Byte = 1
 
-      val fos = new FileOutputStream(file);
-      fos.write(bid.asByteArray());
-      fos.writeLong(blob.mimeType.code);
-      fos.writeLong(blob.length);
+  override def save(blob: Blob): BlobId = {
+    val bid = generateId();
+    val file = locateFile(bid);
+    file.getParentFile.mkdirs();
 
-      blob.offerStream { bis =>
-        IOUtils.copy(bis, fos);
-      }
-      fos.close();
+    val fos = new DataOutputStream(new FileOutputStream(file))
+    fos.writeByte(HEADER_SINGLE_BLOB_STORE);
+    fos.write(bid.asByteArray());
+    fos.writeLong(blob.mimeType.code);
+    fos.writeLong(blob.length);
 
-      bid;
+    blob.offerStream { bis =>
+      IOUtils.copy(bis, fos);
+    }
+    fos.close();
+
+    if (logger.isDebugEnabled()) {
+      logger.debug(s"saved a blob in ${file.getAbsoluteFile.getCanonicalPath}")
     }
 
-    override def load(id: BlobId): Option[Blob] = {
-      val file = locateFile(id)
-      if (file.exists())
-        Some(readFromBlobFile(file)._2)
-      else
-        None
-    }
+    bid
+  }
 
-    override def delete(id: BlobId): Unit =
-      locateFile(id).delete()
-
-    private def generateId(): BlobId = {
-      val uuid = UUID.randomUUID()
-      BlobId(uuid.getMostSignificantBits, uuid.getLeastSignificantBits);
-    }
-
-    private def locateFile(bid: BlobId): File = {
-      val idname = bid.asLiteralString();
-      new File(_rootDir, s"${idname.substring(28, 32)}/$idname");
-    }
-
-    private def readFromBlobFile(blobFile: File): (BlobId, Blob) = {
-      val fis = new FileInputStream(blobFile);
-      val blobId = BlobIdFactory.readFromStream(fis);
+  override def load(id: BlobId): Option[Blob] = {
+    val blobFile = locateFile(id)
+    if (blobFile.exists()) {
+      val fis = new DataInputStream(new FileInputStream(blobFile))
+      fis.skip(1 + 16) //1B flag + 16B BlobId
       val mimeType = MimeTypeFactory.fromCode(fis.readLong());
       val length = fis.readLong();
       fis.close();
@@ -105,31 +106,136 @@ object BlobStorage extends Logging {
         def offerStream[T](consume: (InputStream) => T): T = {
           val is = new FileInputStream(blobFile);
           //NOTE: skip
-          is.skip(8 * 4);
+          is.skip(1 + 16 + 8 + 8) //1B flag + 16B BlobId + 8B mimeType + 8B blob length
           val t = consume(is);
           is.close();
           t;
         }
-      }, length, Some(mimeType));
-
-      (blobId, blob);
+      }, length, Some(mimeType))
+      Some(blob)
     }
-
-    override def initialize(storeDir: File, conf: Configuration): Unit = {
-      val baseDir: File = storeDir; //new File(conf.getRaw("unsupported.dbms.directories.neo4j_home").get());
-      _rootDir = conf.getAsFile("blob.storage.file.dir", baseDir, new File(baseDir, "/blob"));
-      _rootDir.mkdirs();
-      logger.info(s"using storage dir: ${_rootDir.getCanonicalPath}");
-    }
-
-    override def disconnect(): Unit = {
+    else {
+      None
     }
   }
 
-  def createDefault(): BlobStorage = {
-    //will read "default-blob-value-storage-class" entry first
-    GlobalContext.getOption("default-blob-value-storage-class")
-      .map(Class.forName(_).newInstance().asInstanceOf[BlobStorage])
-      .getOrElse(new DefaultLocalFileSystemBlobValueStorage())
+  override def delete(id: BlobId): Unit = {
+    val file = locateFile(id)
+    file.delete()
+    if (logger.isDebugEnabled()) {
+      logger.debug(s"deleted a blob in ${file.getAbsoluteFile.getCanonicalPath}")
+    }
+  }
+
+  private def generateId(): BlobId = {
+    val uuid = UUID.randomUUID()
+    new BlobId(uuid.getMostSignificantBits, uuid.getLeastSignificantBits);
+  }
+
+  private def locateFile(bid: BlobId): File = {
+    val idname = bid.asLiteralString();
+    new File(_rootDir, s"${idname.substring(28, 32)}/$idname");
+  }
+
+  override def initialize(storeDir: File, conf: Configuration): Unit = {
+    val baseDir: File = storeDir; //new File(conf.getRaw("unsupported.dbms.directories.neo4j_home").get());
+    _rootDir = conf.getAsFile("blob.storage.file.dir", baseDir, new File(baseDir, "/blob"));
+    _rootDir.mkdirs();
+    if (logger.isInfoEnabled)
+      logger.info(s"using storage dir: ${_rootDir.getCanonicalPath}");
+  }
+
+  override def disconnect(): Unit = {
+  }
+
+  override def loadGroup(gid: BlobId): Option[Array[Blob]] = {
+    val blobFile = locateFile(gid)
+    if (blobFile.exists()) {
+      val fis = new DataInputStream(new FileInputStream(blobFile))
+      fis.skip(1 + 16) //1B flag + 16B BlobId
+      val arrlen = fis.readInt()
+      var offset: Long = 1 + 16 + 4 //1B flag + 16B BlobId + 4B array length
+      offset += arrlen * (8 + 8) //8B mimeType + 8B length
+
+      val entries = (0 to arrlen - 1).toArray.map { i =>
+        val mimeType = MimeTypeFactory.fromCode(fis.readLong())
+        val length = fis.readLong()
+        val offset0 = offset
+        offset += length //8B mimeType + 8B length
+        (i, mimeType, length, offset0)
+      }
+
+      Some(entries.map {
+        x =>
+          x match {
+            case (i: Int, mimeType: MimeType, length: Long, offset: Long) =>
+              BlobFactory.fromInputStreamSource(new InputStreamSource() {
+                def offerStream[T](consume: (InputStream) => T): T = {
+                  val is = new FileInputStream(blobFile);
+                  //NOTE: skip
+                  is.skip(offset)
+                  val t = consume(new InputStream {
+                    var nread = 0
+
+                    override def read(): Int = {
+                      if (nread >= length)
+                        -1
+                      else {
+                        val byte = is.read()
+                        if (byte != -1) {
+                          nread += 1
+                        }
+                        byte
+                      }
+                    }
+                  })
+                  is.close()
+                  t
+                }
+              }, length, Some(mimeType))
+          }
+      })
+    }
+    else {
+      None
+    }
+  }
+
+  override def saveGroup(blobs: Array[Blob]): BlobId = {
+    val bid = generateId();
+    val file = locateFile(bid);
+    file.getParentFile.mkdirs();
+
+    val fos = new DataOutputStream(new FileOutputStream(file))
+    fos.writeByte(HEADER_BLOB_ARRAY_STORE);
+    fos.write(bid.asByteArray());
+    fos.writeInt(blobs.length);
+
+    blobs.foreach { blob =>
+      fos.writeLong(blob.mimeType.code)
+      fos.writeLong(blob.length)
+    }
+
+    blobs.foreach { blob =>
+      blob.offerStream { bis =>
+        IOUtils.copy(bis, fos);
+      }
+    }
+
+    fos.close()
+
+    if (logger.isDebugEnabled()) {
+      logger.debug(s"saved ${blobs.size} blobs in ${file.getAbsoluteFile.getCanonicalPath}")
+    }
+
+    bid
+  }
+
+  override def deleteGroup(gid: BlobId): Unit = {
+    val file = locateFile(gid)
+    file.delete()
+    if (logger.isDebugEnabled()) {
+      logger.debug(s"deleted blobs in ${file.getAbsoluteFile.getCanonicalPath}")
+    }
   }
 }

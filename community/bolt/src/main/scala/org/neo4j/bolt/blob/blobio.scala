@@ -20,7 +20,7 @@
 package org.neo4j.bolt.blob
 
 import org.neo4j.blob._
-import org.neo4j.blob.impl.{BlobFactory, BlobIdFactory}
+import org.neo4j.blob.impl.{BlobFactory}
 import org.neo4j.blob.util.ReflectUtils._
 import org.neo4j.blob.util._
 import org.neo4j.kernel.impl.KernelTransactionEventHub
@@ -48,7 +48,7 @@ object BoltServerBlobIO {
     //write blob entry
     val entry = blob match {
       case e: BlobEntry => e
-      case _ => BlobFactory.makeEntry(BlobIdFactory.EMPTY, blob)
+      case _ => BlobFactory.makeEntry(BlobId.EMPTY, blob)
     }
 
     BlobIO._pack(entry).foreach(out.writeLong(_));

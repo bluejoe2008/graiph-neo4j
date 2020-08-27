@@ -202,6 +202,7 @@ public class DynamicArrayStore extends AbstractDynamicStore
     private static void allocateFromBlob( Collection<DynamicRecord> target, Blob[] array,
                                           DynamicRecordAllocator recordAllocator )
     {
+        /*
         byte[][] blobsAsBytes = new byte[array.length][];
         int totalBytesRequired = STRING_HEADER_SIZE; // 1b type + 4b array length
         for ( int i = 0; i < array.length; i++ )
@@ -209,7 +210,7 @@ public class DynamicArrayStore extends AbstractDynamicStore
             Blob blob = array[i];
             byte[] bytes = StoreBlobIO.saveAndEncodeBlobAsByteArray( InstanceContext.of( recordAllocator ), blob );
             blobsAsBytes[i] = bytes;
-            totalBytesRequired += 4/*byte[].length*/ + bytes.length;
+            totalBytesRequired += 4 + bytes.length;
         }
         ByteBuffer buf = ByteBuffer.allocate( totalBytesRequired );
         buf.put( PropertyType.BLOB.byteValue() );
@@ -219,6 +220,14 @@ public class DynamicArrayStore extends AbstractDynamicStore
             buf.putInt( stringAsBytes.length );
             buf.put( stringAsBytes );
         }
+        allocateRecordsFromBytes( target, buf.array(), recordAllocator );
+        */
+        int totalBytesRequired = 1 + 4 + 16; //1B type + 4B array length + 16B BlobId
+        ByteBuffer buf = ByteBuffer.allocate( totalBytesRequired );
+        buf.put( PropertyType.BLOB.byteValue() );
+        buf.putInt( array.length );
+        StoreBlobIO.saveBlobArray(buf, array , InstanceContext.of( recordAllocator ));
+
         allocateRecordsFromBytes( target, buf.array(), recordAllocator );
     }
 
@@ -373,8 +382,7 @@ public class DynamicArrayStore extends AbstractDynamicStore
             ByteBuffer headerBuffer = ByteBuffer.wrap( header, 1/*skip the type*/, header.length - 1 );
             int arrayLength = headerBuffer.getInt();
             ByteBuffer dataBuffer = ByteBuffer.wrap( bArray );
-            Blob[] result = StoreBlobIO.readBlobArray( ic, dataBuffer, arrayLength );
-            return Values.blobArray( result );
+            return StoreBlobIO.readBlobArray(ic, dataBuffer, arrayLength);
         }
         else if ( typeId == PropertyType.GEOMETRY.intValue() )
         {

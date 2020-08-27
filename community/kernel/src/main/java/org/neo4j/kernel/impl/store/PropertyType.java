@@ -269,7 +269,7 @@ public enum PropertyType
         @Override
         public void onPropertyDelete( ContextMap ic, PrimitiveRecord primitive, PropertyRecord propRecord, PropertyBlock block )
         {
-            StoreBlobIO.deleteBlobProperty( ic, primitive,  propRecord,  block );
+            StoreBlobIO.deleteBlobProperty( ic, block );
         }
     };
 

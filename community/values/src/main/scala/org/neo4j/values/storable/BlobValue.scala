@@ -62,19 +62,6 @@ case class BlobValue(val blob: Blob) extends ScalarValue {
   override def updateHash(hashFunction: HashFunction, hash: Long): Long = hash
 }
 
-class BlobArraySupport[X <: BlobArraySupport[X]](val blobs: Array[Blob]) {
-  val values: Array[AnyValue] = blobs.map(new BlobValue(_));
-
-  def writeTo[E <: Exception](writer: ValueWriter[E]) {
-    writer.beginArray(values.length, ValueWriter.ArrayType.BLOB)
-    blobs.foreach(writer.writeBlob(_));
-    writer.endArray()
-  }
-
-  def unsafeCompareTo(other: Value): Int = if (_equals(other)) 0 else -1;
-
-  def _equals(other: Value): Boolean = {
-    other.isInstanceOf[X] &&
-      other.asInstanceOf[X].blobs.zip(blobs).map(t => t._1 == t._2).reduce(_ && _)
-  }
+trait BlobArrayProvider {
+  def get(): Array[Blob]
 }
