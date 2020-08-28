@@ -46,6 +46,10 @@ trait BlobStorage extends Closable {
   def saveGroup(blobs: Array[Blob]): BlobId
 
   def deleteGroup(gid: BlobId): Unit
+
+  def existsGroup(gid: BlobId): Boolean
+
+  def exists(bid: BlobId): Boolean
 }
 
 object BlobStorage extends Logging {
@@ -132,9 +136,9 @@ class LocalFileSystemBlobValueStorage extends BlobStorage with Logging {
     new BlobId(uuid.getMostSignificantBits, uuid.getLeastSignificantBits);
   }
 
-  private def locateFile(bid: BlobId): File = {
+  private def locateFile(bid: BlobId, suffix: String = ".blob"): File = {
     val idname = bid.asLiteralString();
-    new File(_rootDir, s"${idname.substring(28, 32)}/$idname");
+    new File(_rootDir, s"${idname.substring(28, 32)}/${idname}${suffix}");
   }
 
   override def initialize(storeDir: File, conf: Configuration): Unit = {
@@ -149,7 +153,7 @@ class LocalFileSystemBlobValueStorage extends BlobStorage with Logging {
   }
 
   override def loadGroup(gid: BlobId): Option[Array[Blob]] = {
-    val blobFile = locateFile(gid)
+    val blobFile = locateFile(gid, "group")
     if (blobFile.exists()) {
       val fis = new DataInputStream(new FileInputStream(blobFile))
       fis.skip(1 + 16) //1B flag + 16B BlobId
@@ -203,7 +207,7 @@ class LocalFileSystemBlobValueStorage extends BlobStorage with Logging {
 
   override def saveGroup(blobs: Array[Blob]): BlobId = {
     val bid = generateId();
-    val file = locateFile(bid);
+    val file = locateFile(bid, "group");
     file.getParentFile.mkdirs();
 
     val fos = new DataOutputStream(new FileOutputStream(file))
@@ -232,10 +236,14 @@ class LocalFileSystemBlobValueStorage extends BlobStorage with Logging {
   }
 
   override def deleteGroup(gid: BlobId): Unit = {
-    val file = locateFile(gid)
+    val file = locateFile(gid, "group")
     file.delete()
     if (logger.isDebugEnabled()) {
       logger.debug(s"deleted blobs in ${file.getAbsoluteFile.getCanonicalPath}")
     }
   }
+
+  override def existsGroup(gid: BlobId): Boolean = locateFile(gid, "group").exists()
+
+  override def exists(bid: BlobId): Boolean = locateFile(bid).exists()
 }

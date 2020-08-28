@@ -21,6 +21,7 @@ package org.neo4j.kernel.impl.blob
 
 import java.io.InputStream
 import java.nio.ByteBuffer
+import java.util.ServiceLoader
 
 import org.neo4j.blob._
 import org.neo4j.blob.impl.BlobFactory
@@ -31,8 +32,22 @@ import org.neo4j.values.storable.{BlobArray, BlobArrayProvider, BlobValue, Value
 /**
   * Created by bluejoe on 2019/3/29.
   */
-object StoreBlobIO extends Logging {
-  def saveBlobArray(buf: ByteBuffer, blobs: Array[Blob], ic: ContextMap) = {
+trait StoreBlobIOService {
+  def saveBlobArray(buf: ByteBuffer, blobs: Array[Blob], ic: ContextMap)
+
+  def saveBlob(ic: ContextMap, blob: Blob, keyId: Int, block: PropertyBlock)
+
+  def deleteBlobArrayProperty(ic: ContextMap, blobs: BlobArray): Unit
+
+  def deleteBlobProperty(ic: ContextMap, block: PropertyBlock): Unit
+
+  def readBlobArray(ic: ContextMap, dataBuffer: ByteBuffer, arrayLength: Int): BlobArray
+
+  def readBlobValue(ic: ContextMap, values: Array[Long]): BlobValue
+}
+
+class DefaultStoreBlobIOService extends StoreBlobIOService {
+  override def saveBlobArray(buf: ByteBuffer, blobs: Array[Blob], ic: ContextMap) = {
     val bid = ic.get[BlobStorage].saveGroup(blobs);
     val bytes = bid.asByteArray()
     buf.put(bytes)
@@ -45,12 +60,12 @@ object StoreBlobIO extends Logging {
   }
    */
 
-  def saveBlob(ic: ContextMap, blob: Blob, keyId: Int, block: PropertyBlock) = {
+  override def saveBlob(ic: ContextMap, blob: Blob, keyId: Int, block: PropertyBlock) = {
     val bid = ic.get[BlobStorage].save(blob);
     block.setValueBlocks(BlobIO._pack(BlobFactory.makeEntry(bid, blob), keyId));
   }
 
-  def deleteBlobArrayProperty(ic: ContextMap, blobs: BlobArray): Unit = {
+  override def deleteBlobArrayProperty(ic: ContextMap, blobs: BlobArray): Unit = {
     /*
     blobs.value().foreach(blob =>
       ic.get[BlobStorage].delete(blob.asInstanceOf[ManagedBlob].id))
@@ -61,13 +76,9 @@ object StoreBlobIO extends Logging {
     }
   }
 
-  def deleteBlobProperty(ic: ContextMap, block: PropertyBlock): Unit = {
+  override def deleteBlobProperty(ic: ContextMap, block: PropertyBlock): Unit = {
     val entry = BlobIO.unpack(block.getValueBlocks);
     ic.get[BlobStorage].delete(entry.id);
-  }
-
-  def readBlob(ic: ContextMap, bytes: Array[Byte]): Blob = {
-    readBlobValue(ic, StreamUtils.convertByteArray2LongArray(bytes)).blob;
   }
 
   /*
@@ -81,7 +92,7 @@ object StoreBlobIO extends Logging {
   }
    */
 
-  def readBlobArray(ic: ContextMap, dataBuffer: ByteBuffer, arrayLength: Int): BlobArray = {
+  override def readBlobArray(ic: ContextMap, dataBuffer: ByteBuffer, arrayLength: Int): BlobArray = {
     val bytes = BlobId.EMPTY.asByteArray()
     dataBuffer.get(bytes)
     val bid = BlobId.fromBytes(bytes)
@@ -90,11 +101,7 @@ object StoreBlobIO extends Logging {
     })
   }
 
-  def readBlobValue(ic: ContextMap, block: PropertyBlock): BlobValue = {
-    readBlobValue(ic, block.getValueBlocks);
-  }
-
-  def readBlobValue(ic: ContextMap, values: Array[Long]): BlobValue = {
+  override def readBlobValue(ic: ContextMap, values: Array[Long]): BlobValue = {
     val entry = BlobIO.unpack(values);
     val storage = ic.get[BlobStorage];
 
@@ -106,6 +113,42 @@ object StoreBlobIO extends Logging {
     });
 
     BlobValue(blob);
+  }
+}
+
+object StoreBlobIO extends Logging {
+  val service = ServiceLoader.load[StoreBlobIOService](classOf[StoreBlobIOService]).iterator().next()
+
+  def saveBlobArray(buf: ByteBuffer, blobs: Array[Blob], ic: ContextMap) = {
+    service.saveBlobArray(buf, blobs, ic)
+  }
+
+  def saveBlob(ic: ContextMap, blob: Blob, keyId: Int, block: PropertyBlock) = {
+    service.saveBlob(ic, blob, keyId, block)
+  }
+
+  def deleteBlobArrayProperty(ic: ContextMap, blobs: BlobArray): Unit = {
+    service.deleteBlobArrayProperty(ic, blobs)
+  }
+
+  def deleteBlobProperty(ic: ContextMap, block: PropertyBlock): Unit = {
+    service.deleteBlobProperty(ic, block)
+  }
+
+  def readBlob(ic: ContextMap, bytes: Array[Byte]): Blob = {
+    service.readBlobValue(ic, StreamUtils.convertByteArray2LongArray(bytes)).blob;
+  }
+
+  def readBlobArray(ic: ContextMap, dataBuffer: ByteBuffer, arrayLength: Int): BlobArray = {
+    service.readBlobArray(ic, dataBuffer, arrayLength)
+  }
+
+  def readBlobValue(ic: ContextMap, block: PropertyBlock): BlobValue = {
+    service.readBlobValue(ic, block.getValueBlocks);
+  }
+
+  def readBlobValue(ic: ContextMap, values: Array[Long]): BlobValue = {
+    service.readBlobValue(ic, values)
   }
 }
 
