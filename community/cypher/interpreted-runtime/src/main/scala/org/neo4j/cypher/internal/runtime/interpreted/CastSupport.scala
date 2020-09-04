@@ -22,13 +22,12 @@ package org.neo4j.cypher.internal.runtime.interpreted
 import java.time._
 import java.time.temporal.TemporalAmount
 
-import org.neo4j.blob.Blob
+import org.neo4j.blob.{Blob, BlobId}
 import org.neo4j.cypher.internal.v3_5.util.CypherTypeException
 import org.neo4j.graphdb.spatial.Point
 import org.neo4j.values.storable.{ArrayValue, _}
 import org.neo4j.values.virtual._
 import org.neo4j.values.{AnyValue, AnyValueWriter}
-
 import org.neo4j.kernel.internal.Version
 
 import scala.reflect.ClassTag
@@ -115,6 +114,7 @@ object CastSupport {
       case (_:TimeValue, _:TimeValue) => a
       case (_:LocalTimeValue, _:LocalTimeValue) => a
       case (_:DurationValue, _:DurationValue) => a
+      case (_:BlobValue, _:BlobValue) => a
 
       case (a, b) if a == Values.NO_VALUE || b == Values.NO_VALUE => throw new CypherTypeException(
         "Collections containing null values can not be stored in properties.")
@@ -167,6 +167,8 @@ object CastSupport {
       transform(new ArrayConverterWriter(classOf[OffsetTime], a => Values.timeArray(a.asInstanceOf[Array[OffsetTime]]))))
     case _: LocalDateTimeValue => Converter(
       transform(new ArrayConverterWriter(classOf[LocalDateTime], a => Values.localDateTimeArray(a.asInstanceOf[Array[LocalDateTime]]))))
+    case _: BlobValue => Converter(
+      transform(new ArrayConverterWriter(classOf[Blob], a => Values.blobArray(BlobId.EMPTY, a.asInstanceOf[Array[Blob]]:_*))))
     case _ => throw new CypherTypeException("Property values can only be of primitive types or arrays thereof")
   }
 
