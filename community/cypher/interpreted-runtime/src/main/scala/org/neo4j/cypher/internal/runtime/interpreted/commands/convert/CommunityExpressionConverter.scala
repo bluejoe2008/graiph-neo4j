@@ -21,7 +21,7 @@ package org.neo4j.cypher.internal.runtime.interpreted.commands.convert
 
 import org.neo4j.cypher.internal.planner.v3_5.spi.TokenContext
 import org.neo4j.cypher.internal.runtime.interpreted._
-import org.neo4j.cypher.internal.runtime.interpreted.commands.expressions.{Expression => CommandExpression, InequalitySeekRangeExpression, PointDistanceSeekRangeExpression}
+import org.neo4j.cypher.internal.runtime.interpreted.commands.expressions.{InequalitySeekRangeExpression, PointDistanceSeekRangeExpression, Expression => CommandExpression}
 import org.neo4j.cypher.internal.runtime.interpreted.commands.predicates.Predicate
 import org.neo4j.cypher.internal.runtime.interpreted.commands.values.TokenType.PropertyKey
 import org.neo4j.cypher.internal.runtime.interpreted.commands.values.UnresolvedRelType
@@ -31,14 +31,13 @@ import org.neo4j.cypher.internal.runtime.interpreted.commands.{values => command
 import org.neo4j.cypher.internal.runtime.interpreted.commands.{expressions => commandexpressions}
 import org.neo4j.cypher.internal.v3_5.logical.plans._
 import org.neo4j.cypher.internal.v3_5.expressions.functions._
-import org.neo4j.cypher.internal.v3_5.expressions.DesugaredMapProjection
-import org.neo4j.cypher.internal.v3_5.expressions.Expression
-import org.neo4j.cypher.internal.v3_5.expressions.PropertyKeyName
-import org.neo4j.cypher.internal.v3_5.expressions.functions
+import org.neo4j.cypher.internal.v3_5.expressions.{BLOBExpression, DesugaredMapProjection, Expression, PropertyKeyName, functions}
 import org.neo4j.cypher.internal.v3_5.util.attribution.Id
 import org.neo4j.cypher.internal.v3_5.util.InternalException
 import org.neo4j.cypher.internal.v3_5.util.NonEmptyList
 import org.neo4j.cypher.internal.v3_5.{expressions => ast}
+
+import scala.+:
 
 trait CustomConvertableExpr {
   def convert(id: Id, self: ExpressionConverters): CommandExpression
@@ -67,7 +66,19 @@ case class CommunityExpressionConverter(tokenContext: TokenContext) extends Expr
       case e: ast.Or => predicates.Or(self.toCommandPredicate(id, e.lhs), self.toCommandPredicate(id, e.rhs))
       case e: ast.Xor => predicates.Xor(self.toCommandPredicate(id, e.lhs), self.toCommandPredicate(id, e.rhs))
       case e: ast.And => predicates.And(self.toCommandPredicate(id, e.lhs), self.toCommandPredicate(id, e.rhs))
-      case e: ast.Ands => predicates.Ands(NonEmptyList.from(e.exprs.map(self.toCommandPredicate(id,_))))
+      case e: ast.Ands => predicates.Ands(
+        NonEmptyList.from(
+          {
+            val previousExprs: Iterable[Expression] = e.exprs
+            val blobPushedBackExprs: Iterable[Expression] = {
+              val noBlobExprs: List[Expression] = previousExprs.filter(expr => !expr.isInstanceOf[BLOBExpression]).toList
+              val blobExprs: List[Expression] = previousExprs.filter(expr => expr.isInstanceOf[BLOBExpression]).toList
+              noBlobExprs  ::: blobExprs
+            }
+            blobPushedBackExprs.map(self.toCommandPredicate(id,_))
+          }
+        )
+      )
       case e: ast.Ors => predicates.Ors(NonEmptyList.from(e.exprs.map(self.toCommandPredicate(id,_))))
       case e: ast.Not => predicates.Not(self.toCommandPredicate(id, e.rhs))
       case e: ast.Equals => predicates.Equals(self.toCommandExpression(id, e.lhs), self.toCommandExpression(id, e.rhs))

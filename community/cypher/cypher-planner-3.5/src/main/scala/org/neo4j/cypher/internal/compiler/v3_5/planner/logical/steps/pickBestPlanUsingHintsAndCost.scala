@@ -50,6 +50,7 @@ object pickBestPlanUsingHintsAndCost extends CandidateSelectorFactory {
   private def score[X](projector: X => LogicalPlan, input: X, context: LogicalPlanningContext) = {
     val costs = context.cost
     val plan = projector(input)
+    // if the input is blob Fileter, then expand the cost
     (-context.planningAttributes.solveds.get(plan.id).numHints, costs(plan, context.input, context.planningAttributes.cardinalities).gummyBears, -plan.availableSymbols.size)
   }
 }

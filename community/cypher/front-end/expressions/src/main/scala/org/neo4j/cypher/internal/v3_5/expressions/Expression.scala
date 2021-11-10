@@ -61,6 +61,10 @@ object Expression {
     }
 }
 
+abstract class BLOBExpression extends Expression {
+
+}
+
 abstract class Expression extends ASTNode {
 
   self =>

@@ -43,6 +43,10 @@ import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 
+abstract class BlobPredicate extends Predicate {
+
+}
+
 abstract class Predicate extends Expression {
   def apply(ctx: ExecutionContext, state: QueryState): Value =
     isMatch(ctx, state).

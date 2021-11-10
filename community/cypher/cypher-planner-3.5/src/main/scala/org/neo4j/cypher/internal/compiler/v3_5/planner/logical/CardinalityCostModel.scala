@@ -24,8 +24,7 @@ import org.neo4j.cypher.internal.compiler.v3_5.planner.logical.Metrics._
 import org.neo4j.cypher.internal.ir.v3_5._
 import org.neo4j.cypher.internal.planner.v3_5.spi.PlanningAttributes.Cardinalities
 import org.neo4j.cypher.internal.v3_5.logical.plans._
-import org.neo4j.cypher.internal.v3_5.expressions.HasLabels
-import org.neo4j.cypher.internal.v3_5.expressions.Property
+import org.neo4j.cypher.internal.v3_5.expressions.{BLOBExpression, HasLabels, Property}
 import org.neo4j.cypher.internal.v3_5.util.Cardinality
 import org.neo4j.cypher.internal.v3_5.util.Cost
 import org.neo4j.cypher.internal.v3_5.util.CostPerRow
@@ -50,15 +49,33 @@ case class CardinalityCostModel(config: CypherPlannerConfiguration) extends Cost
     => 1.0
 
     // Filtering on labels and properties
-    case Selection(predicate, _) =>
-      val noOfStoreAccesses = predicate.exprs.treeCount {
-        case _: Property | _: HasLabels => true
-        case _ => false
+    case Selection(predicate, _) => {
+
+      val previousCost = {
+              val noOfStoreAccesses = predicate.exprs.treeCount {
+                case _: Property | _: HasLabels => true
+                case _ => false
+              }
+              if (noOfStoreAccesses > 0)
+                CostPerRow(noOfStoreAccesses)
+              else
+                DEFAULT_COST_PER_ROW
       }
-      if (noOfStoreAccesses > 0)
-        CostPerRow(noOfStoreAccesses)
-      else
-        DEFAULT_COST_PER_ROW
+      val blobExpressionCount = predicate.exprs.count(expr => expr.isInstanceOf[BLOBExpression])
+      if(blobExpressionCount > 0) {
+        previousCost * blobExpressionCount * 10000
+      }
+      else previousCost
+
+    }
+//      val noOfStoreAccesses = predicate.exprs.treeCount {
+//        case _: Property | _: HasLabels => true
+//        case _ => false
+//      }
+//      if (noOfStoreAccesses > 0)
+//        CostPerRow(noOfStoreAccesses)
+//      else
+//        DEFAULT_COST_PER_ROW
 
     case _: AllNodesScan
     => 1.2
